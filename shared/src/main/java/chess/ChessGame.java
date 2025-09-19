@@ -58,7 +58,17 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        throw new RuntimeException("Not implemented");
+        ChessPosition startPos = move.getStartPosition();
+        ChessPosition endPos = move.getEndPosition();
+        Collection<ChessMove> moves = validMoves(startPos);
+        for(ChessMove curMove : moves){
+            if(endPos == curMove.getEndPosition()){
+                ChessPiece movingPiece = chessBoard.getPiece(startPos);
+                chessBoard.addPiece(endPos, movingPiece);
+                chessBoard.removePiece(startPos);
+            }
+        }
+        throw new InvalidMoveException("Move doesn't work");
     }
 
     /**
