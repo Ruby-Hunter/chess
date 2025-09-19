@@ -8,6 +8,7 @@ public class PawnMovesCalculator implements PieceMovesCalculator {
     @Override
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         var moves = new HashSet<>();
+
         return List.of();
     }
 }
