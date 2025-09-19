@@ -1,12 +1,13 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 
 /**
  * Represents a single chess piece
  * <p>
- * Note: You can add to this class, but you may not alter
+ * Note: You can add to this class, abut you may not alter
  * signature of the existing methods.
  */
 public class ChessPiece {
@@ -14,7 +15,7 @@ public class ChessPiece {
     private final ChessGame.TeamColor pieceColor;
     private final PieceType type;
 
-    public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
+    public ChessPiece(ChessGame.TeamColor pieceColor, PieceType type) {
         this.pieceColor = pieceColor;
         this.type = type;
     }
@@ -38,9 +39,6 @@ public class ChessPiece {
         return pieceColor;
     }
 
-    /**
-     * @return which type of chess piece this piece is
-     */
     public PieceType getPieceType() {
         return type;
     }
@@ -53,7 +51,18 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        var moves = new HashSet<ChessMove>();
-        throw new RuntimeException("Not implemented");
+        PieceMovesCalculator calc;
+
+        switch(type){
+            case KING -> calc = new KingMovesCalculator();
+            case QUEEN -> calc = new QueenMovesCalculator();
+            case BISHOP -> calc = new BishopMovesCalculator();
+            case KNIGHT -> calc = new KnightMovesCalculator();
+            case ROOK -> calc = new RookMovesCalculator();
+            case PAWN -> calc = new PawnMovesCalculator();
+            default -> throw new IllegalStateException("Not a piece");
+        }
+        
+        return calc.pieceMoves(board, myPosition);
     }
 }
