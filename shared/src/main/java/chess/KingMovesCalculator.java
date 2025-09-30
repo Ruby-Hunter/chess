@@ -10,22 +10,17 @@ public class KingMovesCalculator implements PieceMovesCalculator {
         var moves = new HashSet<ChessMove>();
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
+        var team = board.getPiece(myPosition).getTeamColor();
 
-        int[][] basicMoves = { {1, 1}, {1, -1}, {-1, 1}, {-1, -1}, {0, 1}, {0, -1}, {1, 0}, {-1, 0}};
-        ChessPiece curPiece = board.getPiece(myPosition);
-        for(int[] dir : basicMoves) {
-            int curRow = row + dir[0]; //x
-            int curCol = col + dir[1];//y
-
-            if ((1 <= curRow && curRow <= 8) && (1 <= curCol && curCol <= 8)) {
-                ChessPosition newPos = new ChessPosition(curRow, curCol);
+        int[][] basicMoves = { {1,0}, {1,-1}, {0,-1}, {-1,-1}, {-1,0}, {-1,1}, {0,1}, {1,1} };
+        for(int[] move : basicMoves){
+            int r = row + move[0];
+            int c = col + move[1];
+            if((1 <= r && r <= 8) && (1 <= c && c <= 8)){
+                ChessPosition newPos = new ChessPosition(r, c);
                 ChessPiece encounter = board.getPiece(newPos);
-                if (encounter == null) {
+                if((encounter == null) || (encounter.getTeamColor() != team)){
                     moves.add(new ChessMove(myPosition, newPos, null));
-                } else { //encountering any piece
-                    if (encounter.getTeamColor() != curPiece.getTeamColor()) { //enemy team
-                        moves.add(new ChessMove(myPosition, newPos, null));
-                    }
                 }
             }
             //TODO: add in "check" logic and castling

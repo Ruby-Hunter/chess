@@ -1,6 +1,8 @@
 package chess;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -11,6 +13,7 @@ import java.util.Collection;
 public class ChessGame {
     private TeamColor teamTurn;
     private ChessBoard chessBoard;
+    Map<TeamColor, ChessPosition> kingPositions = new HashMap<>();
 
     public ChessGame() {
         chessBoard = new ChessBoard();
@@ -62,10 +65,14 @@ public class ChessGame {
         ChessPosition endPos = move.getEndPosition();
         Collection<ChessMove> moves = validMoves(startPos);
         for(ChessMove curMove : moves){
-            if(endPos == curMove.getEndPosition()){
+            if(endPos == curMove.getEndPosition()){ // Checks if the argument move is one of the valid moves
                 ChessPiece movingPiece = chessBoard.getPiece(startPos);
-                chessBoard.addPiece(endPos, movingPiece);
-                chessBoard.removePiece(startPos);
+                chessBoard.addPiece(endPos, movingPiece); // move piece to new spot, possibly replacing a piece there
+                chessBoard.addPiece(startPos, null); // remove piece from startPos
+                if(movingPiece.getPieceType() == ChessPiece.PieceType.KING){
+                    kingPositions.put(movingPiece.getTeamColor(), endPos);
+                }
+                return;
             }
         }
         throw new InvalidMoveException("Move doesn't work");
@@ -88,7 +95,7 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        return (teamColor == teamTurn) && (isInCheck(teamColor)) && (validMoves(kingPositions.get(teamColor)).isEmpty());
     }
 
     /**
@@ -99,8 +106,7 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-//        if(isInCheck(teamColor) && validMoves())
-        return false;
+        return (!isInCheck(teamColor)) && (validMoves(kingPositions.get(teamColor)).isEmpty());
     }
 
     /**
@@ -110,6 +116,8 @@ public class ChessGame {
      */
     public void setBoard(ChessBoard board) {
         chessBoard = board;
+        kingPositions.put(TeamColor.WHITE, new ChessPosition(1, 5));
+        kingPositions.put(TeamColor.BLACK, new ChessPosition(8, 5));
     }
 
     /**

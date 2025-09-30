@@ -9,9 +9,9 @@ public class RookMovesCalculator implements PieceMovesCalculator {
         var moves = new HashSet<ChessMove>();
         int row = myPosition.getRow();
         int col = myPosition.getColumn();
+        var team = board.getPiece(myPosition).getTeamColor();
 
         int[][] basicMoves = { {0, 1}, {0, -1}, {1, 0}, {-1, 0}};
-        ChessPiece curPiece = board.getPiece(myPosition);
         for(int[] dir : basicMoves){
             int curRow = row + dir[0]; //x
             int curCol = col + dir[1]; //y
@@ -23,7 +23,7 @@ public class RookMovesCalculator implements PieceMovesCalculator {
                     moves.add(new ChessMove(myPosition, newPos, null));
                 }
                 else {  //encountering any piece
-                    if(encounter.getTeamColor() != curPiece.getTeamColor()){
+                    if(encounter.getTeamColor() != team){
                         moves.add(new ChessMove(myPosition, newPos, null));
                     }
                     break;
