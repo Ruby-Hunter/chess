@@ -92,7 +92,7 @@ public class ChessBoard {
             }
         }
 
-        // Check if rook or queen can reach
+        // Check if enemy rook or queen can reach
         int[][] straightMoves = { {0, 1}, {0, -1}, {1, 0}, {-1, 0}};
         for(int[] dir : straightMoves) {
             int curRow = row + dir[0]; //x
@@ -113,7 +113,7 @@ public class ChessBoard {
             }
         }
 
-        // Check if bishop or queen can reach
+        // Check if enemy bishop or queen can reach
         int[][] diagMoves = { {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
         for(int[] dir : diagMoves) {
             int curRow = row + dir[0]; //x

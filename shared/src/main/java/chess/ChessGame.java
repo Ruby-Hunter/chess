@@ -3,6 +3,7 @@ package chess;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * For a class that can manage a chess game, making moves on a board
@@ -37,6 +38,20 @@ public class ChessGame {
         teamTurn = team;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ChessGame chessGame = (ChessGame) o;
+        return teamTurn == chessGame.teamTurn && Objects.equals(chessBoard, chessGame.chessBoard) && Objects.equals(kingPositions, chessGame.kingPositions);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(teamTurn, chessBoard, kingPositions);
+    }
+
     /**
      * Enum identifying the 2 possible teams in a chess game
      */
@@ -64,11 +79,14 @@ public class ChessGame {
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
         ChessPosition startPos = move.getStartPosition();
+        ChessPiece movingPiece = chessBoard.getPiece(startPos);
+        if(movingPiece == null){ // If there is no piece, throw an error
+            throw new InvalidMoveException("Move doesn't work");
+        }
         ChessPosition endPos = move.getEndPosition();
         Collection<ChessMove> moves = validMoves(startPos);
         for(ChessMove curMove : moves){
             if(endPos == curMove.getEndPosition()){ // Checks if the argument move is one of the valid moves
-                ChessPiece movingPiece = chessBoard.getPiece(startPos);
                 chessBoard.addPiece(endPos, movingPiece); // move piece to new spot, possibly replacing a piece there
                 chessBoard.addPiece(startPos, null); // remove piece from startPos
                 if(movingPiece.getPieceType() == ChessPiece.PieceType.KING){
