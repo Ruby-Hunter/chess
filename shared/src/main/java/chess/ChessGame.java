@@ -16,7 +16,9 @@ public class ChessGame {
     Map<TeamColor, ChessPosition> kingPositions = new HashMap<>();
 
     public ChessGame() {
-        chessBoard = new ChessBoard();
+        ChessBoard n = new ChessBoard();
+        n.resetBoard();
+        setBoard(n);
     }
 
     /**
@@ -72,6 +74,7 @@ public class ChessGame {
                 if(movingPiece.getPieceType() == ChessPiece.PieceType.KING){
                     kingPositions.put(movingPiece.getTeamColor(), endPos);
                 }
+                teamTurn = ((teamTurn == TeamColor.WHITE) ? TeamColor.BLACK : TeamColor.WHITE); // Changes turn
                 return;
             }
         }
@@ -127,5 +130,9 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return chessBoard;
+    }
+
+    public void takeTurn(){
+//        ChessBoard
     }
 }

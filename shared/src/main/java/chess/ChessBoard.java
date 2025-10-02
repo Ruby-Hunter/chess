@@ -63,6 +63,36 @@ public class ChessBoard {
         }
     }
 
+    // Used for isInCheck function; checks all directions to see if tile is safe
+    public boolean checkIfSafe(ChessPosition pos, ChessGame.TeamColor team){
+        int row = pos.getRow();
+        int col = pos.getColumn();
+
+        int[][] basicMoves = { {1,0}, {1,-1}, {0,-1}, {-1,-1}, {-1,0}, {-1,1}, {0,1}, {1,1} };
+        for(int[] dir : basicMoves) {
+            int curRow = row + dir[0]; //x
+            int curCol = col + dir[1];//y
+            while ((1 <= curRow && curRow <= 8) && (1 <= curCol && curCol <= 8)) {
+                ChessPosition newPos = new ChessPosition(curRow, curCol);
+                ChessPiece encounter = getPiece(newPos);
+                if (encounter != null) {
+                    if (encounter.getTeamColor() != team){
+
+                    }
+                    moves.add(new ChessMove(myPosition, newPos, null));
+                } else { //encountering any piece
+                    if (encounter.getTeamColor() != curPiece.getTeamColor()) {
+                        moves.add(new ChessMove(myPosition, newPos, null));
+                    }
+                    break;
+                }
+                curRow += dir[0]; // these 2 statements add both the x and y, so they can be easily copied
+                curCol += dir[1];
+            }
+        }
+        return true;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
