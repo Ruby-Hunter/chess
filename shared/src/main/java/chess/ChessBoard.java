@@ -30,6 +30,19 @@ public class ChessBoard {
         return board[position.getRow()-1][position.getColumn()-1];
     }
 
+    public ChessBoard copy(){
+        ChessBoard newBoard = new ChessBoard();
+        for(int r = 0; r < 8; r++){
+            for(int c = 0; c < 8; c++){
+                ChessPiece piece = this.board[r][c];
+                if(piece != null){
+                    newBoard.board[r][c] = piece;
+                }
+            }
+        }
+        return newBoard;
+    }
+
     /**
      * Sets the board to the default starting board
      * (How the game of chess normally starts)

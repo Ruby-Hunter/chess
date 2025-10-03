@@ -19,6 +19,11 @@ public class ChessPiece {
         this.type = type;
     }
 
+    public ChessPiece(ChessPiece template){
+        this.pieceColor = template.pieceColor;
+        this.type = template.type;
+    }
+
     /**
      * The various different chess piece options
      */
