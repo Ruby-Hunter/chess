@@ -118,8 +118,8 @@ public class ChessBoard {
                         if(encounter.getPieceType() == ChessPiece.PieceType.ROOK || encounter.getPieceType() == ChessPiece.PieceType.QUEEN){
                             return false;
                         }
-                        break;
                     }
+                    break;
                 }
                 curRow += dir[0]; // these 2 statements add both the x and y, so they can be easily copied
                 curCol += dir[1];
@@ -139,15 +139,15 @@ public class ChessBoard {
                         if(encounter.getPieceType() == ChessPiece.PieceType.BISHOP || encounter.getPieceType() == ChessPiece.PieceType.QUEEN){
                             return false;
                         }
-                        break;
                     }
+                    break;
                 }
                 curRow += dir[0]; // these 2 statements add both the x and y, so they can be easily copied
                 curCol += dir[1];
             }
         }
 
-        // Check if enemy king or pawn can reach
+        // Check if enemy knight can reach
         int[][] knightMoves = { {2,-1}, {1,-2}, {-1,-2}, {-2,-1}, {-2,1}, {-1,2}, {1,2}, {2,1} };
         for(int[] move : knightMoves){
             int curRow = row + move[0];
@@ -164,6 +164,18 @@ public class ChessBoard {
         return true; // If it's safe, return true
     }
 
+    public ChessPosition findPiecePos(ChessGame.TeamColor team, ChessPiece.PieceType type) {
+        for(int r = 0; r < 8; r++){
+            for(int c = 0; c < 8; c++){
+                ChessPiece piece = board[r][c];
+                if(piece != null && (piece.getPieceType() == type) && piece.getTeamColor() == team){
+                    return new ChessPosition(r+1, c+1);
+                }
+            }
+        }
+        return null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
@@ -177,4 +189,54 @@ public class ChessBoard {
     public int hashCode() {
         return Arrays.deepHashCode(board);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+
+        // Print column labels
+        sb.append("    a  b  c  d  e  f  g  h\n");
+        sb.append("   -------------------------\n");
+
+        // Print rows from 8 (top) to 1 (bottom)
+        for (int row = 8; row >= 1; row--) {
+            sb.append(row).append(" | ");  // Row label on the left
+            for (int col = 1; col <= 8; col++) {
+                ChessPiece piece = getPiece(new ChessPosition(row, col));
+                if (piece == null) {
+                    sb.append(".  "); // Empty square
+                } else {
+                    sb.append(getPieceSymbol(piece)).append("  ");
+                }
+            }
+            sb.append("| ").append(row).append("\n");
+        }
+
+        sb.append("   -------------------------\n");
+        sb.append("    a  b  c  d  e  f  g  h\n");
+
+        return sb.toString();
+    }
+
+    /**
+     * Returns a single-character symbol for the piece.
+     * Uppercase = White, lowercase = Black
+     */
+    private String getPieceSymbol(ChessPiece piece) {
+        String symbol;
+        switch (piece.getPieceType()) {
+            case KING -> symbol = "K";
+            case QUEEN -> symbol = "Q";
+            case ROOK -> symbol = "R";
+            case BISHOP -> symbol = "B";
+            case KNIGHT -> symbol = "N";
+            case PAWN -> symbol = "P";
+            default -> symbol = "?";
+        }
+        if (piece.getTeamColor() == ChessGame.TeamColor.BLACK) {
+            symbol = symbol.toLowerCase();
+        }
+        return symbol;
+    }
+
 }
