@@ -170,10 +170,6 @@ public class ChessGame {
         return chessBoard;
     }
 
-//    public void takeTurn(){
-////        ChessBoard
-//    }
-
     public boolean hasMoves(TeamColor color){
         for(int r = 1; r <= 8; r++){
             for(int c = 1; c <= 8; c++){
