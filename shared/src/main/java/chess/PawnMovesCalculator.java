@@ -17,8 +17,8 @@ public class PawnMovesCalculator implements PieceMovesCalculator {
 
         PromoAdder addPromotions = newPos -> {
             moves.add(new ChessMove(myPosition, newPos, ChessPiece.PieceType.QUEEN));
-            moves.add(new ChessMove(myPosition, newPos, ChessPiece.PieceType.ROOK));
             moves.add(new ChessMove(myPosition, newPos, ChessPiece.PieceType.BISHOP));
+            moves.add(new ChessMove(myPosition, newPos, ChessPiece.PieceType.ROOK));
             moves.add(new ChessMove(myPosition, newPos, ChessPiece.PieceType.KNIGHT));
         };
 

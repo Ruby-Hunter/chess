@@ -76,20 +76,9 @@ public class ChessGame {
             TeamColor pieceTeam = movingPiece.getTeamColor();
             newBoard.addPiece(move.getEndPosition(), movingPiece);
             newBoard.addPiece(startPosition, null);
-//            if(movingPiece.getPieceType() == ChessPiece.PieceType.KING){
-//                if(!newBoard.checkIfSafe(move.getEndPosition(), pieceTeam)){
-//                    it.remove();
-//                }
-//            }
-//            else if(!newBoard.checkIfSafe(kingPositions.get(pieceTeam), pieceTeam)){
-//                it.remove();
-//            }
             if(!newBoard.checkIfSafe(newBoard.findPiecePos(pieceTeam, ChessPiece.PieceType.KING), pieceTeam)){
                 it.remove();
             }
-//            if(isInCheck(movingPiece.getTeamColor())){
-//                it.remove();
-//            }
         }
         return moves;
     }
@@ -115,7 +104,12 @@ public class ChessGame {
         for(ChessMove curMove : moves){
             if(endPos.equals(curMove.getEndPosition())){ // Checks if the argument move is one of the valid moves
                 if(curMove.getPromotionPiece() != null){
-                    movingPiece = new ChessPiece(movPieceTeam, curMove.getPromotionPiece());
+                    if(curMove.getPromotionPiece() == move.getPromotionPiece()){
+                        movingPiece = new ChessPiece(movPieceTeam, curMove.getPromotionPiece());
+                    }
+                    else{
+                        continue;
+                    }
                 }
                 chessBoard.addPiece(endPos, movingPiece); // move piece to new spot, possibly replacing a piece there
                 chessBoard.addPiece(startPos, null); // remove piece from startPos
@@ -185,7 +179,7 @@ public class ChessGame {
             for(int c = 1; c <= 8; c++){
                 ChessPosition curPos = new ChessPosition(r, c);
                 if(chessBoard.getPiece(curPos) != null && chessBoard.getPiece(curPos).getTeamColor() == color){
-                    if(validMoves(curPos) != null){
+                    if(validMoves(curPos) != null && !validMoves(curPos).isEmpty()){
                         return true;
                     }
                 }
