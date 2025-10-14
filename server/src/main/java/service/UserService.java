@@ -1,9 +1,13 @@
 package service;
 
-import datamodel.UserData;
+import datamodel.*;
 
 public class UserService {
-    public void register(UserData user){
+    public AuthData register(UserData user){
+        return new AuthData(user.username(), generateAuthToken());
+    }
 
+    private String generateAuthToken(){
+        return "hallo";
     }
 }
