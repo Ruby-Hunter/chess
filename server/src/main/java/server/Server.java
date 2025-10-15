@@ -7,8 +7,6 @@ import io.javalin.*;
 import io.javalin.http.Context;
 import service.UserService;
 
-import java.util.Map;
-
 public class Server {
 
     private final Javalin server;
@@ -23,6 +21,7 @@ public class Server {
         server.delete("db", ctx -> ctx.result("{}"));
         server.post("user", ctx -> register(ctx));
         server.post("session", ctx -> login(ctx));
+        server.delete("session", ctx -> logout(ctx));
     }
 
     private void register(Context ctx){
@@ -41,12 +40,29 @@ public class Server {
     }
 
     private void login(Context ctx){
-        var serializer = new Gson();
-        String reqJson = ctx.body();
-        var auth = serializer.fromJson(reqJson, Map.class);
-        var loggedIn = userServ.login(auth);
-        var authData = userServ.login()
-        ctx.result((serializer.toJson(authData)))
+        try {
+            var serializer = new Gson();
+            String reqJson = ctx.body();
+            var login = serializer.fromJson(reqJson, LoginData.class);
+            var authData = userServ.login(login);
+            ctx.result(serializer.toJson(authData));
+        } catch(Exception ex){
+            var msg = String.format("{ \"message\": \"Error: %s\" }", ex.getMessage());
+            ctx.status(401).result(msg);
+        }
+    }
+
+    private void logout(Context ctx){
+        try {
+            var serializer = new Gson();
+            String reqJson = ctx.body();
+            var auth = serializer.fromJson(reqJson, String.class);
+            userServ.logout(auth);
+            ctx.result(serializer.toJson(""));
+        } catch(Exception ex){
+            var msg = String.format("{ \"message\": \"Error: %s\" }", ex.getMessage());
+            ctx.status(401).result(msg);
+        }
     }
 
     public int run(int desiredPort) {
