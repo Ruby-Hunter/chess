@@ -7,6 +7,8 @@ import io.javalin.*;
 import io.javalin.http.Context;
 import service.UserService;
 
+import java.util.Map;
+
 public class Server {
 
     private final Javalin server;
@@ -20,6 +22,7 @@ public class Server {
         // Register your endpoints and exception handlers here.
         server.delete("db", ctx -> ctx.result("{}"));
         server.post("user", ctx -> register(ctx));
+        server.post("session", ctx -> login(ctx));
     }
 
     private void register(Context ctx){
@@ -37,12 +40,13 @@ public class Server {
         }
     }
 
-    private boolean login(Context ctx){
+    private void login(Context ctx){
         var serializer = new Gson();
         String reqJson = ctx.body();
-        var auth = serializer.fromJson(reqJson, AuthData.class);
+        var auth = serializer.fromJson(reqJson, Map.class);
         var loggedIn = userServ.login(auth);
-        return loggedIn;
+        var authData = userServ.login()
+        ctx.result((serializer.toJson(authData)))
     }
 
     public int run(int desiredPort) {

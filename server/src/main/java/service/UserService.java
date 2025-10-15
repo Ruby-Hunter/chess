@@ -3,6 +3,8 @@ package service;
 import dataaccess.DataAccess;
 import datamodel.*;
 
+import java.util.Objects;
+
 public class UserService {
     private final DataAccess dataAccess;
 
@@ -16,16 +18,21 @@ public class UserService {
         }
         dataAccess.createUser(user);
         var authData = new AuthData(user.username(), generateAuthToken());
+
         return authData;
     }
 
-    public boolean login(AuthData auth) throws Exception{
-        if(dataAccess.getAuth(auth.authToken()) != null){
+    public AuthData login(LoginData login) throws Exception{
+        var userData = dataAccess.getUser(login.username());
+        if(userData == null){
             throw new Exception("unauthorized");
         }
-        dataAccess.createUser(user);
-        var authData = new AuthData(user.username(), generateAuthToken());
-        return authData;
+
+        if(Objects.equals(login.password(), userData.password())){
+            var authData = new AuthData(user.username(), generateAuthToken());
+            return authData;
+        }
+
     }
 
     private String generateAuthToken(){
