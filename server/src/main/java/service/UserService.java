@@ -4,6 +4,7 @@ import dataaccess.DataAccess;
 import datamodel.*;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class UserService {
     private final DataAccess dataAccess;
@@ -44,6 +45,6 @@ public class UserService {
     }
 
     private String generateAuthToken(){
-        return "hallo";
+        return UUID.randomUUID().toString();
     }
 }
