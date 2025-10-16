@@ -9,9 +9,9 @@ public interface DataAccess {
     void clear();
     void createUser(UserData user);
     void createAuth(AuthData auth);
+    void createGame(GameData game);
     UserData getUser(String username);
     AuthData getAuth(String authToken);
     void deleteAuth(String authToken);
     HashSet<GameData> listGames();
-    Integer createGame(String gameName);
 }

@@ -26,6 +26,8 @@ public class Server {
         server.post("session", ctx -> login(ctx));
         server.delete("session", ctx -> logout(ctx));
         server.get("game", ctx -> listGames(ctx));
+        server.post("game", ctx -> createGame(ctx));
+        server.put("game", ctx -> joinGame(ctx));
     }
 
     private void register(Context ctx){
@@ -105,10 +107,28 @@ public class Server {
             var serializer = new Gson();
             String reqJsonHeader = ctx.header("authorization");
             String reqJsonBody = ctx.body();
-
+            String auth = serializer.fromJson(reqJsonHeader, String.class);
+            String gameName = serializer.fromJson(reqJsonBody, String.class);
+            Integer gameID = userServ.createGame(auth, gameName);
+            ctx.result(serializer.toJson(gameID));
+        } catch (BadRequestException ex){
+            var msg = String.format("{ \"message\": \"Error: %s\" }", ex.getMessage());
+            ctx.status(400).result(msg);
+        } catch(UnauthorizedException ex){
+            var msg = String.format("{ \"message\": \"Error: %s\" }", ex.getMessage());
+            ctx.status(401).result(msg);
         } catch (Exception ex){
             var msg = String.format("{ \"message\": \"Error: %s\" }", ex.getMessage());
             ctx.status(500).result(msg);
+        }
+    }
+
+    private void joinGame(Context ctx){
+        try{
+            var serializer = new Gson();
+            String reqJsonHeader = ctx.header("authorization");
+            String reqJsonBody = ctx.body();
+            String auth = serializer.fromJson(reqJsonHeader, String.class);
         }
     }
 

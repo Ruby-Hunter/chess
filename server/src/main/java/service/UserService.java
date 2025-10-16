@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dataaccess.DataAccess;
 import datamodel.*;
 
@@ -9,6 +10,7 @@ import java.util.UUID;
 
 public class UserService {
     private final DataAccess dataAccess;
+    static int curID = 0;
 
     public UserService(DataAccess dataAccess){
         this.dataAccess = dataAccess;
@@ -60,10 +62,24 @@ public class UserService {
     }
 
     public Integer createGame(String authToken, String gameName){
-
+        if(authToken == null  ||  gameName == null){
+            throw new BadRequestException("bad request");
+        }
+        var auth = dataAccess.getAuth(authToken);
+        if(auth == null){ // check if auth exists
+            throw new UnauthorizedException("unauthorized");
+        }
+        int gameID = generateID();
+        var game = new GameData(gameID, null, null, gameName, new ChessGame());
+        dataAccess.createGame(game);
+        return gameID;
     }
 
     private String generateAuthToken(){
         return UUID.randomUUID().toString();
+    }
+
+    private Integer generateID(){
+        return curID++;
     }
 }

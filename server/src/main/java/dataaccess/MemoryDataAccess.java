@@ -28,6 +28,11 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     @Override
+    public void createGame(GameData game) {
+        games.put(game.gameID(), game);
+    }
+
+    @Override
     public UserData getUser(String username) {
         return users.get(username);
     }
@@ -46,11 +51,5 @@ public class MemoryDataAccess implements DataAccess{
     public HashSet<GameData> listGames() {
         return (HashSet<GameData>) games.values();
     }
-
-    @Override
-    public Integer createGame(String gameName) {
-        return 0;
-    }
-
 
 }
