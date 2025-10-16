@@ -10,10 +10,11 @@ import java.util.UUID;
 
 public class UserService {
     private final DataAccess dataAccess;
-    static int curID = 0;
+    static int curID = 1;
 
     public UserService(DataAccess dataAccess){
         this.dataAccess = dataAccess;
+        curID = 1;
     }
 
     public AuthData register(UserData user) throws Exception{
@@ -73,6 +74,40 @@ public class UserService {
         var game = new GameData(gameID, null, null, gameName, new ChessGame());
         dataAccess.createGame(game);
         return gameID;
+    }
+
+    public void joinGame(String authToken, JoinData joinData){
+        if(authToken == null  ||  joinData.gameID() == null  ||  joinData.playerColor() == null
+                ||  !(joinData.playerColor().equals("WHITE")  ||  joinData.playerColor().equals("BLACK")) ){
+            throw new BadRequestException("bad request");
+        }
+        var auth = dataAccess.getAuth(authToken);
+        if(auth == null){ // check if auth exists
+            throw new UnauthorizedException("unauthorized");
+        }
+        GameData gameData = dataAccess.getGame(joinData.gameID());
+        if(gameData == null){
+            throw new UnauthorizedException("unauthorized");
+        }
+        GameData newGame;
+        if(joinData.playerColor().equals("WHITE")){
+            if(gameData.whiteUsername() != null){
+                throw new AlreadyTakenException("already taken");
+            } else{
+                newGame = new GameData(gameData.gameID(), auth.username(), gameData.blackUsername(), gameData.gameName(), gameData.game());
+            }
+        } else {
+            if(gameData.blackUsername() != null){
+                throw new AlreadyTakenException("already taken");
+            } else{
+                newGame = new GameData(gameData.gameID(), gameData.whiteUsername(), auth.username(), gameData.gameName(), gameData.game());
+            }
+        }
+        dataAccess.updateGame(newGame);
+    }
+
+    public void clear(){
+        dataAccess.clear();
     }
 
     private String generateAuthToken(){

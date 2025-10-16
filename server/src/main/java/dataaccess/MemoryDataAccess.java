@@ -43,6 +43,11 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     @Override
+    public GameData getGame(Integer gameID) {
+        return games.get(gameID);
+    }
+
+    @Override
     public void deleteAuth(String authToken) {
         auths.remove(authToken);
     }
@@ -50,6 +55,11 @@ public class MemoryDataAccess implements DataAccess{
     @Override
     public HashSet<GameData> listGames() {
         return (HashSet<GameData>) games.values();
+    }
+
+    @Override
+    public void updateGame(GameData updatedGame) {
+        games.put(updatedGame.gameID(), updatedGame);
     }
 
 }

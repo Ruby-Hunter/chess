@@ -21,7 +21,7 @@ public class Server {
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
         // Register your endpoints and exception handlers here.
-        server.delete("db", ctx -> ctx.result("{}"));
+        server.delete("db", ctx -> clearData(ctx));
         server.post("user", ctx -> register(ctx));
         server.post("session", ctx -> login(ctx));
         server.delete("session", ctx -> logout(ctx));
@@ -76,7 +76,7 @@ public class Server {
             String reqJson = ctx.header("authorization");
             var auth = serializer.fromJson(reqJson, String.class);
             userServ.logout(auth);
-            ctx.result(serializer.toJson(""));
+            ctx.result(serializer.toJson(null));
         } catch(UnauthorizedException ex){
             var msg = String.format("{ \"message\": \"Error: %s\" }", ex.getMessage());
             ctx.status(401).result(msg);
@@ -129,6 +129,32 @@ public class Server {
             String reqJsonHeader = ctx.header("authorization");
             String reqJsonBody = ctx.body();
             String auth = serializer.fromJson(reqJsonHeader, String.class);
+            JoinData joinData = serializer.fromJson(reqJsonBody, JoinData.class);
+            userServ.joinGame(auth, joinData);
+            ctx.result(serializer.toJson(null));
+        } catch (BadRequestException ex){
+            var msg = String.format("{ \"message\": \"Error: %s\" }", ex.getMessage());
+            ctx.status(400).result(msg);
+        } catch(UnauthorizedException ex){
+            var msg = String.format("{ \"message\": \"Error: %s\" }", ex.getMessage());
+            ctx.status(401).result(msg);
+        } catch (AlreadyTakenException ex){
+            var msg = String.format("{ \"message\": \"Error: %s\" }", ex.getMessage());
+            ctx.status(403).result(msg);
+        } catch (Exception ex){
+            var msg = String.format("{ \"message\": \"Error: %s\" }", ex.getMessage());
+            ctx.status(500).result(msg);
+        }
+    }
+
+    private void clearData(Context ctx){
+        try{
+            var serializer = new Gson();
+            userServ.clear();
+            ctx.result(serializer.toJson(null));
+        } catch (Exception ex){
+            var msg = String.format("{ \"message\": \"Error: %s\" }", ex.getMessage());
+            ctx.status(500).result(msg);
         }
     }
 
