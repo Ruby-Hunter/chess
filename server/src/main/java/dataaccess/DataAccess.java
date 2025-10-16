@@ -2,6 +2,9 @@ package dataaccess;
 
 import datamodel.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public interface DataAccess {
     void clear();
     void createUser(UserData user);
@@ -9,4 +12,6 @@ public interface DataAccess {
     UserData getUser(String username);
     AuthData getAuth(String authToken);
     void deleteAuth(String authToken);
+    HashSet<GameData> listGames();
+    Integer createGame(String gameName);
 }
