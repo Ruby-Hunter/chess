@@ -61,6 +61,17 @@ class UserServiceTest {
     }
 
     @Test
+    void listGamesBadAuth() throws Exception {
+        DataAccess db = new MemoryDataAccess();
+        UserService service = new UserService(db);
+
+        assertThrows(UnauthorizedException.class,
+                () -> service.listGames("bad_authToken")
+        );
+
+    }
+
+    @Test
     void createGame() throws Exception {
         DataAccess db = new MemoryDataAccess();
         UserService service = new UserService(db);
@@ -73,26 +84,47 @@ class UserServiceTest {
     }
 
     @Test
+    void createBadGame() throws Exception {
+        DataAccess db = new MemoryDataAccess();
+        UserService service = new UserService(db);
+        var user = new UserData("henry", "henryshenry@henry.org", "HEN123");
+        var authData = service.register(user);
+        assertThrows(BadRequestException.class,
+                () -> service.createGame(authData.authToken(), null)
+        );
+    }
+
+    @Test
     void joinGame() throws Exception {
         DataAccess db = new MemoryDataAccess();
         UserService service = new UserService(db);
         var user = new UserData("henry", "henryshenry@henry.org", "HEN123");
         var authData = service.register(user);
-        var user2 = new UserData("henrietta", "henriettashenry@henry.org", "HEN123");
-        var authData2 = service.register(user2);
         var gameID = service.createGame(authData.authToken(), "Game1");
         service.joinGame(authData.authToken(), new JoinData("WHITE", gameID));
         assertNotNull(db.getGame(gameID).whiteUsername());
         assertNull(db.getGame(gameID).blackUsername());
 
-        Exception exception = assertThrows(AlreadyTakenException.class,
-                () -> service.joinGame(authData2.authToken(), new JoinData("WHITE", gameID))
-        );
-
         var user3 = new UserData("henrychen", "henrychenshenry@henry.org", "HEN123");
         var authData3 = service.register(user3);
         service.joinGame(authData3.authToken(), new JoinData("BLACK", gameID));
         assertNotNull(db.getGame(gameID).blackUsername());
+    }
+
+    @Test
+    void joinTakenGame() throws Exception {
+        DataAccess db = new MemoryDataAccess();
+        UserService service = new UserService(db);
+        var user = new UserData("henry", "henryshenry@henry.org", "HEN123");
+        var authData = service.register(user);
+        var gameID = service.createGame(authData.authToken(), "Game1");
+        service.joinGame(authData.authToken(), new JoinData("WHITE", gameID));
+
+        var user2 = new UserData("henrietta", "henriettashenry@henry.org", "HEN123");
+        var authData2 = service.register(user2);
+        assertThrows(AlreadyTakenException.class,
+                () -> service.joinGame(authData2.authToken(), new JoinData("WHITE", gameID))
+        );
     }
 
     @Test
