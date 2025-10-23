@@ -34,6 +34,17 @@ class UserServiceTest {
     }
 
     @Test
+    void badLogin() throws Exception {
+        DataAccess db = new MemoryDataAccess();
+        UserService service = new UserService(db);
+        var user = new UserData("henry", "henryshenry@henry.org", "HEN123");
+        service.register(user);
+        assertThrows(UnauthorizedException.class,
+                () -> service.login(new LoginData("henry", "badPW"))
+        );
+    }
+
+    @Test
     void logout() throws Exception {
         DataAccess db = new MemoryDataAccess();
         UserService service = new UserService(db);
@@ -43,6 +54,18 @@ class UserServiceTest {
         assertNotNull(db.getAuth(authData.authToken()));
         service.logout(authData.authToken());
         assertNull(db.getAuth(authData.authToken()));
+    }
+
+    @Test
+    void badLogout() throws Exception {
+        DataAccess db = new MemoryDataAccess();
+        UserService service = new UserService(db);
+        var user = new UserData("henry", "henryshenry@henry.org", "HEN123");
+        service.register(user);
+        service.login(new LoginData("henry", "HEN123"));
+        assertThrows(UnauthorizedException.class,
+                () -> service.logout("badtoken")
+        );
     }
 
     @Test
@@ -64,11 +87,9 @@ class UserServiceTest {
     void listGamesBadAuth() throws Exception {
         DataAccess db = new MemoryDataAccess();
         UserService service = new UserService(db);
-
         assertThrows(UnauthorizedException.class,
                 () -> service.listGames("bad_authToken")
         );
-
     }
 
     @Test
@@ -140,5 +161,19 @@ class UserServiceTest {
         service.clear();
         assertNull(db.getUser(user.username()));
         assertNull(db.getGame(gameID));
+    }
+
+    @Test
+    void userAfterClear() throws Exception {
+        DataAccess db = new MemoryDataAccess();
+        UserService service = new UserService(db);
+        var user = new UserData("henry", "henryshenry@henry.org", "HEN123");
+        var authData = service.register(user);
+        var user2 = new UserData("henrietta", "henriettashenry@henry.org", "HEN123");
+        service.register(user2);
+        service.clear();
+        assertThrows(Exception.class,
+                () -> service.createGame(authData.authToken(), "Game1")
+        );
     }
 }
