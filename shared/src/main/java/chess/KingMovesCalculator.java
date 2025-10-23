@@ -23,7 +23,6 @@ public class KingMovesCalculator implements PieceMovesCalculator {
                     moves.add(new ChessMove(myPosition, newPos, null));
                 }
             }
-            //TODO: add in "check" logic and castling
         }
         return moves;
     }
