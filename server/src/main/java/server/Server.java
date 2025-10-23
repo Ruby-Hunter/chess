@@ -10,7 +10,6 @@ import service.BadRequestException;
 import service.UnauthorizedException;
 import service.UserService;
 
-import java.util.Dictionary;
 import java.util.Map;
 
 public class Server {
@@ -93,7 +92,8 @@ public class Server {
             var serializer = new Gson();
             String auth = ctx.header("authorization");
             var gamesList = userServ.listGames(auth);
-            ctx.result(serializer.toJson(gamesList));
+            var listGamesRes = Map.of("games", gamesList);
+            ctx.result(serializer.toJson(listGamesRes));
         } catch(UnauthorizedException ex){
             var msg = String.format("{ \"message\": \"Error: %s\" }", ex.getMessage());
             ctx.status(401).result(msg);
@@ -108,10 +108,11 @@ public class Server {
             var serializer = new Gson();
             String auth = ctx.header("authorization");
             String reqJsonBody = ctx.body();
-            Map<String, Object> gameMap = serializer.fromJson(reqJsonBody, Map.class);
+            Map gameMap = serializer.fromJson(reqJsonBody, Map.class);
             String gameName = (String)gameMap.get("gameName");
             int gameID = userServ.createGame(auth, gameName);
-            ctx.result(serializer.toJson(gameID));
+            var createGameResult = Map.of("gameID", gameID);
+            ctx.result(serializer.toJson(createGameResult));
         } catch (BadRequestException ex){
             var msg = String.format("{ \"message\": \"Error: %s\" }", ex.getMessage());
             ctx.status(400).result(msg);
