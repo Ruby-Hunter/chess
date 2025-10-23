@@ -76,8 +76,7 @@ public class Server {
     private void logout(Context ctx){
         try {
             var serializer = new Gson();
-            String reqJson = ctx.header("authorization");
-            var auth = serializer.fromJson(reqJson, String.class);
+            String auth = ctx.header("authorization");
             userServ.logout(auth);
             ctx.result(serializer.toJson(null));
         } catch(UnauthorizedException ex){
@@ -92,8 +91,7 @@ public class Server {
     private void listGames(Context ctx){
         try{
             var serializer = new Gson();
-            String reqJson = ctx.header("authorization");
-            String auth = serializer.fromJson(reqJson, String.class);
+            String auth = ctx.header("authorization");
             var gamesList = userServ.listGames(auth);
             ctx.result(serializer.toJson(gamesList));
         } catch(UnauthorizedException ex){
@@ -108,9 +106,8 @@ public class Server {
     private void createGame(Context ctx){
         try{
             var serializer = new Gson();
-            String reqJsonHeader = ctx.header("authorization");
+            String auth = ctx.header("authorization");
             String reqJsonBody = ctx.body();
-            String auth = serializer.fromJson(reqJsonHeader, String.class);
             Map<String, String> gameMap = serializer.fromJson(reqJsonBody, Map.class);
             String gameName = gameMap.get("gameName");
             int gameID = userServ.createGame(auth, gameName);
@@ -130,9 +127,8 @@ public class Server {
     private void joinGame(Context ctx){
         try{
             var serializer = new Gson();
-            String reqJsonHeader = ctx.header("authorization");
+            String auth = ctx.header("authorization");
             String reqJsonBody = ctx.body();
-            String auth = serializer.fromJson(reqJsonHeader, String.class);
             JoinData joinData = serializer.fromJson(reqJsonBody, JoinData.class);
             userServ.joinGame(auth, joinData);
             ctx.result(serializer.toJson(null));

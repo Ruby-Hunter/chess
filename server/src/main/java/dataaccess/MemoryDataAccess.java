@@ -54,7 +54,7 @@ public class MemoryDataAccess implements DataAccess{
 
     @Override
     public HashSet<GameData> listGames() {
-        return (HashSet<GameData>) games.values();
+        return new HashSet<>(games.values());
     }
 
     @Override
