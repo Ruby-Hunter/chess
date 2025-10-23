@@ -93,13 +93,11 @@ public class ChessBoard {
                     if(encounter.getPieceType() == ChessPiece.PieceType.KING) {
                         return false;
                     }
-                    else if(encounter.getPieceType() == ChessPiece.PieceType.PAWN){
-                        if(team == ChessGame.TeamColor.WHITE && (move[0] == 1) && (move[1] == 1 || move[1] == -1)){
-                            return false;
-                        }
-                        else if(team == ChessGame.TeamColor.BLACK && (move[0] == -1) && (move[1] == 1 || move[1] == -1)){
-                            return false;
-                        }
+                    else if(encounter.getPieceType() == ChessPiece.PieceType.PAWN  &&
+                            (team == ChessGame.TeamColor.WHITE && (move[0] == 1) && (move[1] == 1 || move[1] == -1)) ||
+                            team == ChessGame.TeamColor.BLACK && (move[0] == -1) && (move[1] == 1 || move[1] == -1)
+                    ){
+                        return false;
                     }
                 }
             }
@@ -114,10 +112,11 @@ public class ChessBoard {
                 ChessPosition curPos = new ChessPosition(curRow, curCol);
                 ChessPiece encounter = getPiece(curPos);
                 if (encounter != null) {
-                    if (encounter.getTeamColor() != team){
-                        if(encounter.getPieceType() == ChessPiece.PieceType.ROOK || encounter.getPieceType() == ChessPiece.PieceType.QUEEN){
-                            return false;
-                        }
+                    if (encounter.getTeamColor() != team  &&
+                            (encounter.getPieceType() == ChessPiece.PieceType.ROOK ||
+                            encounter.getPieceType() == ChessPiece.PieceType.QUEEN)
+                    ){
+                        return false;
                     }
                     break;
                 }
@@ -135,10 +134,11 @@ public class ChessBoard {
                 ChessPosition curPos = new ChessPosition(curRow, curCol);
                 ChessPiece encounter = getPiece(curPos);
                 if (encounter != null) {
-                    if (encounter.getTeamColor() != team){
-                        if(encounter.getPieceType() == ChessPiece.PieceType.BISHOP || encounter.getPieceType() == ChessPiece.PieceType.QUEEN){
-                            return false;
-                        }
+                    if (encounter.getTeamColor() != team  &&
+                            (encounter.getPieceType() == ChessPiece.PieceType.BISHOP ||
+                            encounter.getPieceType() == ChessPiece.PieceType.QUEEN)
+                    ){
+                        return false;
                     }
                     break;
                 }

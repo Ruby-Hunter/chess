@@ -18,7 +18,7 @@ class UserServiceTest {
         var authData = service.register(user);
         assertNotNull(authData);
         assertEquals(user.username(), authData.username());
-        assertTrue(!authData.authToken().isEmpty());
+        assertFalse(authData.authToken().isEmpty());
     }
 
     @Test
@@ -30,7 +30,7 @@ class UserServiceTest {
         var authData = service.login(new LoginData("henry", "HEN123"));
         assertNotNull(authData);
         assertEquals(user.username(), authData.username());
-        assertTrue(!authData.authToken().isEmpty());
+        assertFalse(authData.authToken().isEmpty());
     }
 
     @Test
@@ -40,6 +40,7 @@ class UserServiceTest {
         var user = new UserData("henry", "henryshenry@henry.org", "HEN123");
         service.register(user);
         var authData = service.login(new LoginData("henry", "HEN123"));
+        assertNotNull(db.getAuth(authData.authToken()));
         service.logout(authData.authToken());
         assertNull(db.getAuth(authData.authToken()));
     }
@@ -50,13 +51,13 @@ class UserServiceTest {
         UserService service = new UserService(db);
         var user = new UserData("henry", "henryshenry@henry.org", "HEN123");
         var authData = service.register(user);
-        var gameID = service.createGame(authData.authToken(), "Game1");
-        var gameID2 = service.createGame(authData.authToken(), "Game2");
+        service.createGame(authData.authToken(), "Game1");
+        service.createGame(authData.authToken(), "Game2");
         var games = service.listGames(authData.authToken());
         assertNotNull(games);
         assertFalse(games.isEmpty());
         assertEquals(db.listGames().size(), games.size());
-        assertEquals(db.listGames().size(), 2);
+        assertEquals(2, games.size());
     }
 
     @Test
@@ -68,6 +69,7 @@ class UserServiceTest {
         var gameID = service.createGame(authData.authToken(), "Game1");
         assertNotNull(gameID);
         assertNotNull(db.getGame(gameID));
+        assertEquals(db.getGame(gameID).gameID(), gameID);
     }
 
     @Test
