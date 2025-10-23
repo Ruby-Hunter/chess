@@ -108,8 +108,8 @@ public class Server {
             var serializer = new Gson();
             String auth = ctx.header("authorization");
             String reqJsonBody = ctx.body();
-            Map<String, String> gameMap = serializer.fromJson(reqJsonBody, Map.class);
-            String gameName = gameMap.get("gameName");
+            Map<String, Object> gameMap = serializer.fromJson(reqJsonBody, Map.class);
+            String gameName = (String)gameMap.get("gameName");
             int gameID = userServ.createGame(auth, gameName);
             ctx.result(serializer.toJson(gameID));
         } catch (BadRequestException ex){

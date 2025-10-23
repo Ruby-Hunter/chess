@@ -87,7 +87,7 @@ public class UserService {
         }
         GameData gameData = dataAccess.getGame(joinData.gameID());
         if(gameData == null){
-            throw new UnauthorizedException("unauthorized");
+            throw new BadRequestException("bad request");
         }
         GameData newGame;
         if(joinData.playerColor().equals("WHITE")){
