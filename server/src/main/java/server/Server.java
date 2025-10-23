@@ -10,6 +10,9 @@ import service.BadRequestException;
 import service.UnauthorizedException;
 import service.UserService;
 
+import java.util.Dictionary;
+import java.util.Map;
+
 public class Server {
 
     private final Javalin server;
@@ -108,8 +111,9 @@ public class Server {
             String reqJsonHeader = ctx.header("authorization");
             String reqJsonBody = ctx.body();
             String auth = serializer.fromJson(reqJsonHeader, String.class);
-            String gameName = serializer.fromJson(reqJsonBody, String.class);
-            Integer gameID = userServ.createGame(auth, gameName);
+            Map<String, String> gameMap = serializer.fromJson(reqJsonBody, Map.class);
+            String gameName = gameMap.get("gameName");
+            int gameID = userServ.createGame(auth, gameName);
             ctx.result(serializer.toJson(gameID));
         } catch (BadRequestException ex){
             var msg = String.format("{ \"message\": \"Error: %s\" }", ex.getMessage());
