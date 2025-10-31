@@ -21,7 +21,7 @@ public class UserService {
         if(user.username() == null  ||  user.password() == null  ||  user.email() == null){ // Check to see if all fields are valid
             throw new BadRequestException("bad request");
         }
-        if(dataAccess.getUser(user.username()) != null){
+        if(dataAccess.getUser(new LoginData(user.username(), user.password())) != null){
             throw new AlreadyTakenException("already taken");
         }
         dataAccess.createUser(user);
@@ -34,7 +34,7 @@ public class UserService {
         if(login.username() == null  ||  login.password() == null){ // Check to see if all fields are valid
             throw new BadRequestException("bad request");
         }
-        var userData = dataAccess.getUser(login.username()); // Finds UserData that matches login username
+        var userData = dataAccess.getUser(login); // Finds UserData that matches login username
         if(userData == null){
             throw new UnauthorizedException("unauthorized");
         }
