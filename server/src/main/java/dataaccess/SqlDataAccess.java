@@ -1,5 +1,6 @@
 package dataaccess;
 
+import com.google.gson.Gson;
 import com.mysql.cj.log.Log;
 import datamodel.*;
 import org.mindrot.jbcrypt.BCrypt;
@@ -116,8 +117,7 @@ public class SqlDataAccess implements DataAccess{
             statement.setNull(2, Types.LONGNVARCHAR);
             statement.setNull(3, Types.LONGNVARCHAR);
             statement.setString(4, gameData.gameName());
-            new Gson
-            statement.setString(5, gameData.game());
+            statement.setString(5, new Gson().toJson(gameData.game()));
             statement.executeUpdate();
         } catch(Exception ex){
             System.err.println("createAuth problem");
