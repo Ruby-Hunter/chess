@@ -3,6 +3,7 @@ package dataaccess;
 import datamodel.AuthData;
 import datamodel.LoginData;
 import datamodel.UserData;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -36,10 +37,25 @@ class SQLDataAccessTest {
 
     @Test
     void createAuth() {
+        DataAccess db = new SqlDataAccess();
     }
 
     @Test
-    void getUser() {
+    void getUser() throws Exception {
+        DataAccess db = new SqlDataAccess();
+        var user = new UserData("ethan", "berliner@donut.com", "passwort");
+        db.createUser(user);
+        var login = new LoginData("ethanFalsch", "falschesPasswort");
+        UserData got = db.getUser(login);
+        Assertions.assertNotNull(got);
+    }
+
+    @Test
+    void getFakeUser() throws Exception {
+        DataAccess db = new SqlDataAccess();
+        var login = new LoginData("ethanFalsch", "falschesPasswort");
+        UserData got = db.getUser(login);
+        assertNull(got);
     }
 
     @Test

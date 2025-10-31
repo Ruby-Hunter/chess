@@ -47,7 +47,8 @@ class DataAccessTest {
     }
 
     @Test
-    void getAuth() {
+    void getAuth() throws Exception {
+        createAuth();
     }
 
     @Test
