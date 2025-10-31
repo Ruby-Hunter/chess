@@ -14,12 +14,12 @@ public class SqlDataAccess implements DataAccess{
     public SqlDataAccess() {
         try {
             configureDatabase();
-        } catch (DataAccessException ex){
+        } catch (Exception ex){
             System.err.println("Database Creation error");
         }
     }
 
-    private void configureDatabase() throws DataAccessException {
+    private void configureDatabase() throws Exception {
         DatabaseManager.createDatabase();
         try(var conn = DatabaseManager.getConnection()){
             for(String statement : createStatements){
@@ -27,10 +27,10 @@ public class SqlDataAccess implements DataAccess{
                     preparedStatement.executeUpdate();
                 }
             }
-        }
-        catch(DataAccessException | SQLException ex){
-            System.err.print("Database configure error");
-            ex.printStackTrace();
+        } catch(SQLException ex){
+            throw new SQLException(ex.getMessage());
+        } catch(Exception ex){
+            throw new Exception(ex.getMessage());
         }
     }
 
