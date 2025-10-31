@@ -1,5 +1,6 @@
 package dataaccess;
 
+import com.mysql.cj.log.Log;
 import datamodel.*;
 import org.mindrot.jbcrypt.BCrypt;
 import service.AlreadyTakenException;
@@ -59,10 +60,7 @@ public class SqlDataAccess implements DataAccess{
         return BCrypt.hashpw(clearTextPassword, BCrypt.gensalt());
     }
 
-    boolean verifyUser(String username, String providedClearTextPassword) {
-        // read the previously hashed password from the database
-        var hashedPassword = readHashedPasswordFromDatabase(username);
-
+    boolean verifyUser(String username, String providedClearTextPassword, String hashedPassword) {
         return BCrypt.checkpw(providedClearTextPassword, hashedPassword);
     }
 
@@ -113,15 +111,18 @@ public class SqlDataAccess implements DataAccess{
     }
 
     @Override
-    public UserData getUser(String username) {
+    public UserData getUser(LoginData login) {
         try(var conn = DatabaseManager.getConnection()){
             var statement = conn.prepareStatement("SELECT username, email, password FROM users WHERE username = ?");
-            statement.setString(1, username);
+            statement.setString(1, login.username());
             var rs = statement.executeQuery();
             rs.next();
             String email = rs.getString("email");
             String hashedPassword = rs.getString("password");
-            return new UserData();
+            if(verifyUser(login.username(), login.password(), hashedPassword)){
+
+            }
+            return new UserData(login.username(), email, login.password());
         } catch(Exception ex){
             System.err.println("getUser problem");
         }

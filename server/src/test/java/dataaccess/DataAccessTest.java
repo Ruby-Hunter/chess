@@ -1,5 +1,6 @@
 package dataaccess;
 
+import com.mysql.cj.log.Log;
 import datamodel.*;
 import org.junit.jupiter.api.Test;
 
@@ -14,7 +15,7 @@ class DataAccessTest {
         DataAccess db = new MemoryDataAccess();
         db.createUser(new UserData("ethan", "berliner@donut.com", "passwort"));
         db.clear();
-        assertNull(db.getUser("ethan"));
+        assertNull(db.getUser(new LoginData("ethan", "passwort")));
         db.createAuth(new AuthData("ethan", "a2z"));
         db.clear();
         assertNull(db.getAuth("a2z"));
@@ -25,7 +26,7 @@ class DataAccessTest {
         DataAccess db = new MemoryDataAccess();
         var user = new UserData("ethan", "berliner@donut.com", "passwort");
         db.createUser(user);
-        assertEquals(user, db.getUser(user.username()));
+        assertEquals(user, db.getUser(new LoginData(user.username(), user.password())));
     }
 
     @Test

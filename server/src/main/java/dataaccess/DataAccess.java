@@ -1,5 +1,6 @@
 package dataaccess;
 
+import com.mysql.cj.log.Log;
 import datamodel.*;
 
 import java.util.HashSet;
@@ -10,7 +11,7 @@ public interface DataAccess {
     void createUser(UserData user);
     void createAuth(AuthData auth);
     void createGame(GameData game);
-    UserData getUser(String username);
+    UserData getUser(LoginData login);
     AuthData getAuth(String authToken);
     GameData getGame(Integer gameID);
     void deleteAuth(String authToken);

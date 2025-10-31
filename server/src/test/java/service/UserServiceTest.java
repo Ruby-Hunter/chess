@@ -159,7 +159,7 @@ class UserServiceTest {
         var gameID = service.createGame(authData.authToken(), "Game1");
         assertNotNull(db.getGame(gameID));
         service.clear();
-        assertNull(db.getUser(user.username()));
+        assertNull(db.getUser(new LoginData(user.username(), user.password())));
         assertNull(db.getGame(gameID));
     }
 
