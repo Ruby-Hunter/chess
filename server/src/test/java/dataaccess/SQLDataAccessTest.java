@@ -1,17 +1,22 @@
 package dataaccess;
 
-import datamodel.*;
+import datamodel.AuthData;
+import datamodel.UserData;
 import org.junit.jupiter.api.Test;
 
-import javax.xml.crypto.Data;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-class DataAccessTest {
+class SQLDataAccessTest {
 
     @Test
-    void clear() {
-        DataAccess db = new MemoryDataAccess();
+    void constructorTest() throws DataAccessException {
+        DataAccess db = new SqlDataAccess();
+    }
+
+    @Test
+    void clear() throws DataAccessException {
+        DataAccess db = new SqlDataAccess();
         db.createUser(new UserData("ethan", "berliner@donut.com", "passwort"));
         db.clear();
         assertNull(db.getUser("ethan"));

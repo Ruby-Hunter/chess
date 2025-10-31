@@ -15,14 +15,14 @@ public class SqlDataAccess implements DataAccess{
     private void configureDatabase() throws DataAccessException {
         DatabaseManager.createDatabase();
         try(var conn = DatabaseManager.getConnection()){
-            try(var preparedStatement = conn.prepareStatement("SELECT 1+1")){
-                var rs = preparedStatement.executeQuery();
-                rs.next();
-                System.out.println(rs.getInt(1));
+            for(String statement : createStatements){
+                try(var preparedStatement = conn.prepareStatement(statement)){
+                    preparedStatement.executeUpdate();
+                }
             }
         }
         catch(DataAccessException | SQLException ex){
-
+            System.err.print("Database configure error");
         }
     }
 
@@ -72,11 +72,26 @@ public class SqlDataAccess implements DataAccess{
     }
 
     void writeHashedPasswordToDatabase(String username, String hashedPassword){
+        try(var conn = DatabaseManager.getConnection()){
+            var statement = conn.prepareStatement("");
+            statement.setString(1, username);
+            statement.setString(2, hashedPassword);
+            statement.executeUpdate();
+        } catch(Exception ex){
 
+        }
     }
 
     String readHashedPasswordFromDatabase(String username){
-        return null;
+        try(var conn = DatabaseManager.getConnection()){
+            var statement = conn.prepareStatement("");
+            statement.setString(0, username);
+            var rs = statement.executeQuery();
+            rs.next();
+            return rs.getString(1);
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     @Override
@@ -87,9 +102,9 @@ public class SqlDataAccess implements DataAccess{
     @Override
     public void createUser(UserData user) {
         try(var conn = DatabaseManager.getConnection()){
-            var stat = conn.prepareStatement("");
-            stat.setString(1, user.username());
-            stat.executeUpdate();
+            var statement = conn.prepareStatement("");
+            statement.setString(1, user.username());
+            statement.executeUpdate();
         } catch(Exception ex){
 
         }
@@ -107,7 +122,7 @@ public class SqlDataAccess implements DataAccess{
 
     @Override
     public UserData getUser(String username) {
-        executeQuery()
+//        executeQuery()
         return null;
     }
 
