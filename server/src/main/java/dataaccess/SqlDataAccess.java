@@ -4,9 +4,11 @@ import com.mysql.cj.log.Log;
 import datamodel.*;
 import org.mindrot.jbcrypt.BCrypt;
 import service.AlreadyTakenException;
+import service.UnauthorizedException;
 
 
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.HashSet;
 
 public class SqlDataAccess implements DataAccess{
@@ -51,7 +53,7 @@ public class SqlDataAccess implements DataAccess{
               'whiteUsername' TEXT,
               'blackUsername' TEXT,
               'gameName' varchar(128) NOT NULL,
-              'authToken' TEXT NOT NULL,
+              'game' TEXT NOT NULL,
               PRIMARY KEY ('gameID')
             """
     };
@@ -100,14 +102,26 @@ public class SqlDataAccess implements DataAccess{
             var statement = conn.prepareStatement("INSERT INTO auths VALUES (?, ?)");
             statement.setString(1, auth.username());
             statement.setString(2, auth.authToken());
+            statement.executeUpdate();
         } catch(Exception ex){
             System.err.println("createAuth problem");
         }
     }
 
     @Override
-    public void createGame(GameData game) {
-
+    public void createGame(GameData gameData) {
+        try(var conn = DatabaseManager.getConnection()){
+            var statement = conn.prepareStatement("INSERT INTO games VALUES (?, ?, ?, ?, ?)");
+            statement.setInt(1, gameData.gameID());
+            statement.setNull(2, Types.LONGNVARCHAR);
+            statement.setNull(3, Types.LONGNVARCHAR);
+            statement.setString(4, gameData.gameName());
+            new Gson
+            statement.setString(5, gameData.game());
+            statement.executeUpdate();
+        } catch(Exception ex){
+            System.err.println("createAuth problem");
+        }
     }
 
     @Override
@@ -116,16 +130,21 @@ public class SqlDataAccess implements DataAccess{
             var statement = conn.prepareStatement("SELECT username, email, password FROM users WHERE username = ?");
             statement.setString(1, login.username());
             var rs = statement.executeQuery();
-            rs.next();
+            if(!rs.next()){
+                return null;
+            }
             String email = rs.getString("email");
             String hashedPassword = rs.getString("password");
-            if(verifyUser(login.username(), login.password(), hashedPassword)){
-
+            if(!verifyUser(login.username(), login.password(), hashedPassword)){
+                return new UserData(login.username(), email, login.password());
             }
-            return new UserData(login.username(), email, login.password());
+            else{
+                throw new UnauthorizedException("unauthorized");
+            }
         } catch(Exception ex){
             System.err.println("getUser problem");
         }
+        return null;
     }
 
     @Override
