@@ -232,26 +232,41 @@ public class SqlDataAccess implements DataAccess{
 
     @Override
     public HashSet<GameData> listGames() {
+        HashSet<GameData> gameList = new HashSet<>();
         try(var conn = DatabaseManager.getConnection()){
             var statement = conn.prepareStatement("SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games;");
-            statement.setString(1, authToken);
             try(var rs = statement.executeQuery()) {
-                if (!rs.next()) {
-                    return null;
+                while (rs.next()) {
+                    int gameID = rs.getInt("gameID");
+                    String whiteUsername = rs.getString("whiteUsername");
+                    String blackUsername = rs.getString("blackUsername");
+                    String gameName = rs.getString("gameName");
+                    String gameString = rs.getString("game");
+                    ChessGame game = new Gson().fromJson(gameString, ChessGame.class);
+                    gameList.add(new GameData(gameID, whiteUsername, blackUsername, gameName, game));
                 }
-                String userName = rs.getString("username");
-                return new AuthData(userName, authToken);
             }
         } catch (SQLException ex){
             System.err.println("SQL getAuth problem");
         } catch(Exception ex){
             System.err.println("getAuth problem");
         }
-        return null;
+        return gameList;
     }
 
     @Override
     public void updateGame(GameData updatedGame) {
-
+        try(var conn = DatabaseManager.getConnection()){
+            var statement = conn.prepareStatement("UPDATE games SET whiteUsername = ?, blackUsername = ?, game = ? WHERE gameID = ?;");
+            statement.setString(1, updatedGame.whiteUsername());
+            statement.setString(2, updatedGame.blackUsername());
+            statement.setString(3, new Gson().toJson(updatedGame.blackUsername()));
+            statement.setInt(4, updatedGame.gameID());
+            statement.executeUpdate();
+        } catch (SQLException ex){
+            System.err.println("SQL getAuth problem");
+        } catch(Exception ex){
+            System.err.println("getAuth problem");
+        }
     }
 }
