@@ -164,7 +164,7 @@ public class SqlDataAccess implements DataAccess{
                     return null;
                 }
                 String email = rs.getString("email");
-                String hashedPassword = rs.getString("email");
+                String hashedPassword = rs.getString("password");
                 if(verifyUser(login.password(), hashedPassword)){
                     return new UserData(login.username(), email, login.password());
                 }
@@ -232,6 +232,21 @@ public class SqlDataAccess implements DataAccess{
 
     @Override
     public HashSet<GameData> listGames() {
+        try(var conn = DatabaseManager.getConnection()){
+            var statement = conn.prepareStatement("SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games;");
+            statement.setString(1, authToken);
+            try(var rs = statement.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+                String userName = rs.getString("username");
+                return new AuthData(userName, authToken);
+            }
+        } catch (SQLException ex){
+            System.err.println("SQL getAuth problem");
+        } catch(Exception ex){
+            System.err.println("getAuth problem");
+        }
         return null;
     }
 
