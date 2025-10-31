@@ -38,7 +38,7 @@ public class SqlDataAccess implements DataAccess{
             """
             CREATE TABLE IF NOT EXISTS users (
               username varchar(128) NOT NULL,
-              email TEXT NOT NULL,
+              email varchar(128) NOT NULL,
               password TEXT NOT NULL,
               PRIMARY KEY (username)
             );
@@ -47,7 +47,7 @@ public class SqlDataAccess implements DataAccess{
             """
             CREATE TABLE IF NOT EXISTS auths (
               username varchar(128) NOT NULL,
-              authToken TEXT NOT NULL,
+              authToken varchar(256) NOT NULL,
               PRIMARY KEY (username),
               INDEX(authToken)
             );
