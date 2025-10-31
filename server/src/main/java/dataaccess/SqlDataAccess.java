@@ -2,6 +2,7 @@ package dataaccess;
 
 import datamodel.*;
 import org.mindrot.jbcrypt.BCrypt;
+import service.AlreadyTakenException;
 
 
 import java.sql.SQLException;
@@ -29,20 +30,17 @@ public class SqlDataAccess implements DataAccess{
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS users (
-              'id' int NOT NULL AUTOINCREMENT,
               'username' varchar(128) NOT NULL,
-              'password' TEXT NOT NULL,
               'email' TEXT NOT NULL,
-              PRIMARY KEY ('id'),
-              INDEX(username)
+              'password' TEXT NOT NULL,
+              PRIMARY KEY ('username')
             """,
 
             """
             CREATE TABLE IF NOT EXISTS auths (
-              'id' int NOT NULL,
               'username' varchar(128) NOT NULL,
               'authToken' TEXT NOT NULL,
-              PRIMARY KEY ('id'),
+              PRIMARY KEY ('username'),
               INDEX (authToken)
             """,
 
@@ -57,11 +55,8 @@ public class SqlDataAccess implements DataAccess{
             """
     };
 
-    void storeUserPassword(String username, String clearTextPassword) {
-        String hashedPassword = BCrypt.hashpw(clearTextPassword, BCrypt.gensalt());
-
-        // write the hashed password in database along with the user's other information
-        writeHashedPasswordToDatabase(username, hashedPassword);
+    String encryptPassword(String clearTextPassword) {
+        return BCrypt.hashpw(clearTextPassword, BCrypt.gensalt());
     }
 
     boolean verifyUser(String username, String providedClearTextPassword) {
@@ -71,24 +66,13 @@ public class SqlDataAccess implements DataAccess{
         return BCrypt.checkpw(providedClearTextPassword, hashedPassword);
     }
 
-    void writeHashedPasswordToDatabase(String username, String hashedPassword){
-        try(var conn = DatabaseManager.getConnection()){
-            var statement = conn.prepareStatement("");
-            statement.setString(1, username);
-            statement.setString(2, hashedPassword);
-            statement.executeUpdate();
-        } catch(Exception ex){
-
-        }
-    }
-
     String readHashedPasswordFromDatabase(String username){
         try(var conn = DatabaseManager.getConnection()){
-            var statement = conn.prepareStatement("");
-            statement.setString(0, username);
+            var statement = conn.prepareStatement("SELECT password FROM users WHERE username = ?");
+            statement.setString(1, username);
             var rs = statement.executeQuery();
             rs.next();
-            return rs.getString(1);
+            return rs.getString(0);
         } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
@@ -102,17 +86,25 @@ public class SqlDataAccess implements DataAccess{
     @Override
     public void createUser(UserData user) {
         try(var conn = DatabaseManager.getConnection()){
-            var statement = conn.prepareStatement("");
+            var statement = conn.prepareStatement("INSERT INTO users VALUES (?, ?, ?)");
             statement.setString(1, user.username());
+            statement.setString(2, user.email());
+            statement.setString(3, encryptPassword(user.password()));
             statement.executeUpdate();
         } catch(Exception ex){
-
+            System.err.println("createUser problem");
         }
     }
 
     @Override
     public void createAuth(AuthData auth) {
-
+        try(var conn = DatabaseManager.getConnection()){
+            var statement = conn.prepareStatement("INSERT INTO auths VALUES (?, ?)");
+            statement.setString(1, auth.username());
+            statement.setString(2, auth.authToken());
+        } catch(Exception ex){
+            System.err.println("createAuth problem");
+        }
     }
 
     @Override
@@ -122,8 +114,17 @@ public class SqlDataAccess implements DataAccess{
 
     @Override
     public UserData getUser(String username) {
-//        executeQuery()
-        return null;
+        try(var conn = DatabaseManager.getConnection()){
+            var statement = conn.prepareStatement("SELECT username, email, password FROM users WHERE username = ?");
+            statement.setString(1, username);
+            var rs = statement.executeQuery();
+            rs.next();
+            String email = rs.getString("email");
+            String hashedPassword = rs.getString("password");
+            return new UserData();
+        } catch(Exception ex){
+            System.err.println("getUser problem");
+        }
     }
 
     @Override
