@@ -36,8 +36,23 @@ class SQLDataAccessTest {
     }
 
     @Test
-    void createAuth() {
+    void createAuth() throws Exception {
         DataAccess db = new SqlDataAccess();
+        String un = "user";
+        String authTokey = "tokey";
+        AuthData authie = new AuthData(un, authTokey);
+        db.createAuth(authie);
+        assertEquals(authie, db.getAuth(authTokey));
+    }
+
+    @Test
+    void createBadAuth() throws Exception {
+        DataAccess db = new SqlDataAccess();
+        String un = "user";
+        String authTokey = "tokey";
+        AuthData authie = new AuthData(un, null);
+        db.createAuth(authie);
+        assertEquals(authie, db.getAuth(authTokey));
     }
 
     @Test
