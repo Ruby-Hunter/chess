@@ -38,6 +38,9 @@ public class UserService {
         if(userData == null){
             throw new UnauthorizedException("unauthorized");
         }
+//        if(dataAccess.loggedIn(login.username())){
+//            throw new UnauthorizedException("unauthorized");
+//        }
         var authData = new AuthData(login.username(), generateAuthToken());
         dataAccess.createAuth(authData);
         return authData;

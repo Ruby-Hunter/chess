@@ -48,8 +48,8 @@ public class SqlDataAccess implements DataAccess{
             CREATE TABLE IF NOT EXISTS auths (
               username varchar(128) NOT NULL,
               authToken varchar(256) NOT NULL,
-              PRIMARY KEY (username),
-              INDEX(authToken)
+              PRIMARY KEY (authToken),
+              INDEX(username)
             );
             """,
 
@@ -111,7 +111,7 @@ public class SqlDataAccess implements DataAccess{
             statement.setString(2, auth.authToken());
             statement.executeUpdate();
         } catch (SQLException ex){
-            System.err.println("SQL AuthData problem");
+            System.err.println("SQL createAuth problem");
         } catch(Exception ex){
             System.err.println("createAuth problem");
         }
