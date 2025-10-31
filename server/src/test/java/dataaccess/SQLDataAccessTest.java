@@ -6,8 +6,7 @@ import datamodel.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class SQLDataAccessTest {
 
@@ -46,13 +45,14 @@ class SQLDataAccessTest {
     }
 
     @Test
-    void createBadAuth() throws Exception {
+    void createBadAuth() {
         DataAccess db = new SqlDataAccess();
         String un = "user";
         String authTokey = "tokey";
         AuthData authie = new AuthData(un, null);
-        db.createAuth(authie);
-        assertEquals(authie, db.getAuth(authTokey));
+        assertThrows(Exception.class,
+                () -> db.createAuth(authie)
+        );
     }
 
     @Test
