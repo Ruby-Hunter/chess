@@ -65,60 +65,60 @@ public class SqlDataAccess implements DataAccess{
             """
     };
 
-    String encryptPassword(String clearTextPassword) {
+    private String encryptPassword(String clearTextPassword) {
         return BCrypt.hashpw(clearTextPassword, BCrypt.gensalt());
     }
 
-    boolean verifyUser(String providedClearTextPassword, String hashedPassword) {
+    private boolean verifyUser(String providedClearTextPassword, String hashedPassword) {
         return BCrypt.checkpw(providedClearTextPassword, hashedPassword);
     }
 
     @Override
-    public void clear() {
+    public void clear() throws Exception {
         try(var conn = DatabaseManager.getConnection()){
             try(var statement = conn.createStatement()){
                 statement.executeUpdate("TRUNCATE TABLE users;");
                 statement.executeUpdate("TRUNCATE TABLE games;");
                 statement.executeUpdate("TRUNCATE TABLE auths;");
             }
-        } catch (SQLException ex){
-            System.err.println("SQL clear problem");
+        } catch(SQLException ex){
+            throw new SQLException(ex.getMessage());
         } catch(Exception ex){
-            System.err.println(ex.getMessage());
+            throw new Exception(ex.getMessage());
         }
     }
 
     @Override
-    public void createUser(UserData user) {
+    public void createUser(UserData user) throws Exception {
         try(var conn = DatabaseManager.getConnection()){
             var statement = conn.prepareStatement("INSERT INTO users VALUES (?, ?, ?);");
             statement.setString(1, user.username());
             statement.setString(2, user.email());
             statement.setString(3, encryptPassword(user.password()));
             statement.executeUpdate();
-        } catch (SQLException ex){
-            System.err.println("SQL createUser problem");
+        } catch(SQLException ex){
+            throw new SQLException(ex.getMessage());
         } catch(Exception ex){
-            System.err.println("createUser problem");
+            throw new Exception(ex.getMessage());
         }
     }
 
     @Override
-    public void createAuth(AuthData auth) {
+    public void createAuth(AuthData auth) throws Exception {
         try(var conn = DatabaseManager.getConnection()){
             var statement = conn.prepareStatement("INSERT INTO auths VALUES (?, ?);");
             statement.setString(1, auth.username());
             statement.setString(2, auth.authToken());
             statement.executeUpdate();
-        } catch (SQLException ex){
-            System.err.println("SQL createAuth problem");
+        } catch(SQLException ex){
+            throw new SQLException(ex.getMessage());
         } catch(Exception ex){
-            System.err.println("createAuth problem");
+            throw new Exception(ex.getMessage());
         }
     }
 
     @Override
-    public void createGame(GameData gameData) {
+    public void createGame(GameData gameData) throws Exception {
         try(var conn = DatabaseManager.getConnection()){
             var statement = conn.prepareStatement("INSERT INTO games VALUES (?, ?, ?, ?, ?);");
             statement.setInt(1, gameData.gameID());
@@ -127,15 +127,15 @@ public class SqlDataAccess implements DataAccess{
             statement.setString(4, gameData.gameName());
             statement.setString(5, new Gson().toJson(gameData.game()));
             statement.executeUpdate();
-        } catch (SQLException ex){
-            System.err.println("SQL createGame problem");
+        } catch(SQLException ex){
+            throw new SQLException(ex.getMessage());
         } catch(Exception ex){
-            System.err.println("createAuth problem");
+            throw new Exception(ex.getMessage());
         }
     }
 
     @Override
-    public UserData getUser(LoginData login) { // returns UserData if username matches, else returns null
+    public UserData getUser(LoginData login) throws Exception { // returns UserData if username matches, else returns null
         try(var conn = DatabaseManager.getConnection()){
             var statement = conn.prepareStatement("SELECT username, email, password FROM users WHERE username = ?;");
             statement.setString(1, login.username());
@@ -146,16 +146,15 @@ public class SqlDataAccess implements DataAccess{
                 String email = rs.getString("email");
                 return new UserData(login.username(), email, login.password());
             }
-        } catch (SQLException ex){
-            System.err.println("SQL getUser problem");
+        } catch(SQLException ex){
+            throw new SQLException(ex.getMessage());
         } catch(Exception ex){
-            System.err.println("getUser problem");
+            throw new Exception(ex.getMessage());
         }
-        return null;
     }
 
     @Override
-    public UserData checkUser(LoginData login) { // returns UserData if login matches it, else returns nulll
+    public UserData checkUser(LoginData login) throws Exception { // returns UserData if login matches it, else returns nulll
         try(var conn = DatabaseManager.getConnection()){
             var statement = conn.prepareStatement("SELECT username, email, password FROM users WHERE username = ?;");
             statement.setString(1, login.username());
@@ -168,17 +167,17 @@ public class SqlDataAccess implements DataAccess{
                 if(verifyUser(login.password(), hashedPassword)){
                     return new UserData(login.username(), email, login.password());
                 }
+                return null;
             }
-        } catch (SQLException ex){
-            System.err.println("SQL getUser problem");
+        } catch(SQLException ex){
+            throw new SQLException(ex.getMessage());
         } catch(Exception ex){
-            System.err.println("getUser problem");
+            throw new Exception(ex.getMessage());
         }
-        return null;
     }
 
     @Override
-    public AuthData getAuth(String authToken) {
+    public AuthData getAuth(String authToken) throws Exception {
         try(var conn = DatabaseManager.getConnection()){
             var statement = conn.prepareStatement("SELECT username, authToken FROM auths WHERE authToken = ?;");
             statement.setString(1, authToken);
@@ -189,16 +188,15 @@ public class SqlDataAccess implements DataAccess{
                 String userName = rs.getString("username");
                 return new AuthData(userName, authToken);
             }
-        } catch (SQLException ex){
-            System.err.println("SQL getAuth problem");
+        } catch(SQLException ex){
+            throw new SQLException(ex.getMessage());
         } catch(Exception ex){
-            System.err.println("getAuth problem");
+            throw new Exception(ex.getMessage());
         }
-        return null;
     }
 
     @Override
-    public GameData getGame(Integer gameID) {
+    public GameData getGame(Integer gameID) throws Exception {
         try(var conn = DatabaseManager.getConnection()){
             var statement = conn.prepareStatement("SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games WHERE gameID = ?;");
             statement.setInt(1, gameID);
@@ -213,25 +211,28 @@ public class SqlDataAccess implements DataAccess{
                 ChessGame game = new Gson().fromJson(gameJson, ChessGame.class);
                 return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
             }
+        } catch(SQLException ex){
+            throw new SQLException(ex.getMessage());
         } catch(Exception ex){
-            System.err.println("getGame problem");
+            throw new Exception(ex.getMessage());
         }
-        return null;
     }
 
     @Override
-    public void deleteAuth(String authToken) { // Drop row from table
+    public void deleteAuth(String authToken) throws Exception { // Drop row from table
         try(var conn = DatabaseManager.getConnection()){
             var statement = conn.prepareStatement("DELETE FROM auths where authToken = ?;");
             statement.setString(1, authToken);
             statement.executeUpdate();
+        } catch(SQLException ex){
+            throw new SQLException(ex.getMessage());
         } catch(Exception ex){
-            System.err.println("deleteAuth problem");
+            throw new Exception(ex.getMessage());
         }
     }
 
     @Override
-    public HashSet<GameData> listGames() {
+    public HashSet<GameData> listGames() throws Exception {
         HashSet<GameData> gameList = new HashSet<>();
         try(var conn = DatabaseManager.getConnection()){
             var statement = conn.prepareStatement("SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games;");
@@ -246,16 +247,16 @@ public class SqlDataAccess implements DataAccess{
                     gameList.add(new GameData(gameID, whiteUsername, blackUsername, gameName, game));
                 }
             }
-        } catch (SQLException ex){
-            System.err.println("SQL getAuth problem");
+        } catch(SQLException ex){
+            throw new SQLException(ex.getMessage());
         } catch(Exception ex){
-            System.err.println("getAuth problem");
+            throw new Exception(ex.getMessage());
         }
         return gameList;
     }
 
     @Override
-    public void updateGame(GameData updatedGame) {
+    public void updateGame(GameData updatedGame) throws Exception {
         try(var conn = DatabaseManager.getConnection()){
             var statement = conn.prepareStatement("UPDATE games SET whiteUsername = ?, blackUsername = ?, game = ? WHERE gameID = ?;");
             statement.setString(1, updatedGame.whiteUsername());
@@ -263,10 +264,10 @@ public class SqlDataAccess implements DataAccess{
             statement.setString(3, new Gson().toJson(updatedGame.game()));
             statement.setInt(4, updatedGame.gameID());
             statement.executeUpdate();
-        } catch (SQLException ex){
-            System.err.println("SQL getAuth problem");
+        } catch(SQLException ex){
+            throw new SQLException(ex.getMessage());
         } catch(Exception ex){
-            System.err.println("getAuth problem");
+            throw new Exception(ex.getMessage());
         }
     }
 }

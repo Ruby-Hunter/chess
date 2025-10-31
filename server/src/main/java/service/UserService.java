@@ -59,7 +59,7 @@ public class UserService {
         return dataAccess.listGames();
     }
 
-    public Integer createGame(String authToken, String gameName){
+    public Integer createGame(String authToken, String gameName) throws Exception {
         if(authToken == null  ||  gameName == null){
             throw new BadRequestException("bad request");
         }
@@ -73,7 +73,7 @@ public class UserService {
         return gameID;
     }
 
-    public void joinGame(String authToken, JoinData joinData){
+    public void joinGame(String authToken, JoinData joinData) throws Exception {
         if(authToken == null  ||  joinData.gameID() == null  ||  joinData.playerColor() == null
                 ||  !(joinData.playerColor().equals("WHITE")  ||  joinData.playerColor().equals("BLACK")) ){
             throw new BadRequestException("bad request");
@@ -103,7 +103,7 @@ public class UserService {
         dataAccess.updateGame(newGame);
     }
 
-    public void clear(){
+    public void clear() throws Exception{
         dataAccess.clear();
     }
 

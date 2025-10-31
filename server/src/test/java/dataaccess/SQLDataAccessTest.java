@@ -16,7 +16,7 @@ class SQLDataAccessTest {
     }
 
     @Test
-    void clear() throws DataAccessException {
+    void clear() throws Exception {
         DataAccess db = new SqlDataAccess();
         db.createUser(new UserData("ethan", "berliner@donut.com", "passwort"));
         db.clear();
@@ -27,7 +27,7 @@ class SQLDataAccessTest {
     }
 
     @Test
-    void createUser() {
+    void createUser() throws Exception {
         DataAccess db = new SqlDataAccess();
         var user = new UserData("ethan", "berliner@donut.com", "passwort");
         db.createUser(user);

@@ -7,15 +7,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 public interface DataAccess {
-    void clear();
-    void createUser(UserData user);
-    void createAuth(AuthData auth);
-    void createGame(GameData game);
-    UserData getUser(LoginData login);
-    UserData checkUser(LoginData login);
-    AuthData getAuth(String authToken);
-    GameData getGame(Integer gameID);
-    void deleteAuth(String authToken);
-    HashSet<GameData> listGames();
-    void updateGame(GameData updatedGame);
+    void clear() throws Exception;
+    void createUser(UserData user) throws Exception;
+    void createAuth(AuthData auth) throws Exception;
+    void createGame(GameData game) throws Exception;
+    UserData getUser(LoginData login) throws Exception;
+    UserData checkUser(LoginData login) throws Exception;
+    AuthData getAuth(String authToken) throws Exception;
+    GameData getGame(Integer gameID) throws Exception;
+    void deleteAuth(String authToken) throws Exception;
+    HashSet<GameData> listGames() throws Exception;
+    void updateGame(GameData updatedGame) throws Exception;
 }
