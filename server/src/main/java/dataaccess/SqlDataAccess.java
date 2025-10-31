@@ -260,7 +260,7 @@ public class SqlDataAccess implements DataAccess{
             var statement = conn.prepareStatement("UPDATE games SET whiteUsername = ?, blackUsername = ?, game = ? WHERE gameID = ?;");
             statement.setString(1, updatedGame.whiteUsername());
             statement.setString(2, updatedGame.blackUsername());
-            statement.setString(3, new Gson().toJson(updatedGame.blackUsername()));
+            statement.setString(3, new Gson().toJson(updatedGame.game()));
             statement.setInt(4, updatedGame.gameID());
             statement.executeUpdate();
         } catch (SQLException ex){
