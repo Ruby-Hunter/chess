@@ -4,6 +4,7 @@ import datamodel.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Objects;
 
 public class MemoryDataAccess implements DataAccess{
     private final HashMap<String, UserData> users = new HashMap<>(); //username, UserData
@@ -35,6 +36,15 @@ public class MemoryDataAccess implements DataAccess{
     @Override
     public UserData getUser(LoginData login) {
         return users.get(login.username());
+    }
+
+    @Override
+    public UserData checkUser(LoginData login) {
+        var user = users.get(login.username());
+        if((user != null) && (Objects.equals(user.password(), login.password()))){
+            return user;
+        }
+        return null;
     }
 
     @Override

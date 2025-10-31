@@ -135,7 +135,7 @@ public class SqlDataAccess implements DataAccess{
     }
 
     @Override
-    public UserData getUser(LoginData login) {
+    public UserData getUser(LoginData login) { // returns UserData if username matches, else returns null
         try(var conn = DatabaseManager.getConnection()){
             var statement = conn.prepareStatement("SELECT username, email, password FROM users WHERE username = ?;");
             statement.setString(1, login.username());
@@ -145,6 +145,29 @@ public class SqlDataAccess implements DataAccess{
                 }
                 String email = rs.getString("email");
                 return new UserData(login.username(), email, login.password());
+            }
+        } catch (SQLException ex){
+            System.err.println("SQL getUser problem");
+        } catch(Exception ex){
+            System.err.println("getUser problem");
+        }
+        return null;
+    }
+
+    @Override
+    public UserData checkUser(LoginData login) { // returns UserData if login matches it, else returns nulll
+        try(var conn = DatabaseManager.getConnection()){
+            var statement = conn.prepareStatement("SELECT username, email, password FROM users WHERE username = ?;");
+            statement.setString(1, login.username());
+            try(var rs = statement.executeQuery()){
+                if(!rs.next()){
+                    return null;
+                }
+                String email = rs.getString("email");
+                String hashedPassword = rs.getString("email");
+                if(verifyUser(login.password(), hashedPassword)){
+                    return new UserData(login.username(), email, login.password());
+                }
             }
         } catch (SQLException ex){
             System.err.println("SQL getUser problem");

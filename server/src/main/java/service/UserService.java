@@ -34,11 +34,8 @@ public class UserService {
         if(login.username() == null  ||  login.password() == null){ // Check to see if all fields are valid
             throw new BadRequestException("bad request");
         }
-        var userData = dataAccess.getUser(login); // Finds UserData that matches login username
+        var userData = dataAccess.checkUser(login); // Finds UserData that matches login username
         if(userData == null){
-            throw new UnauthorizedException("unauthorized");
-        }
-        if(!Objects.equals(login.password(), userData.password())){ // Check if passwords match
             throw new UnauthorizedException("unauthorized");
         }
         var authData = new AuthData(login.username(), generateAuthToken());

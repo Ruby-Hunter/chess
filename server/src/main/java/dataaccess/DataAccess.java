@@ -12,6 +12,7 @@ public interface DataAccess {
     void createAuth(AuthData auth);
     void createGame(GameData game);
     UserData getUser(LoginData login);
+    UserData checkUser(LoginData login);
     AuthData getAuth(String authToken);
     GameData getGame(Integer gameID);
     void deleteAuth(String authToken);
