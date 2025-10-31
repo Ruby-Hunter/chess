@@ -84,7 +84,7 @@ public class SqlDataAccess implements DataAccess{
         } catch (SQLException ex){
             System.err.println("SQL clear problem");
         } catch(Exception ex){
-            System.err.println("clear problem");
+            System.err.println(ex.getMessage());
         }
     }
 

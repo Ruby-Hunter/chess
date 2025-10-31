@@ -28,7 +28,7 @@ class SQLDataAccessTest {
 
     @Test
     void createUser() {
-        DataAccess db = new MemoryDataAccess();
+        DataAccess db = new SqlDataAccess();
         var user = new UserData("ethan", "berliner@donut.com", "passwort");
         db.createUser(user);
         assertEquals(user, db.getUser(new LoginData(user.username(), user.password())));
@@ -40,6 +40,10 @@ class SQLDataAccessTest {
 
     @Test
     void getUser() {
+    }
+
+    @Test
+    void checkUser() {
     }
 
     @Test
