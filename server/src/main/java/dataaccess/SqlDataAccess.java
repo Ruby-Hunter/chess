@@ -5,17 +5,19 @@ import com.google.gson.Gson;
 import com.mysql.cj.log.Log;
 import datamodel.*;
 import org.mindrot.jbcrypt.BCrypt;
-import service.AlreadyTakenException;
-import service.UnauthorizedException;
-
+import service.*;
 
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.HashSet;
 
 public class SqlDataAccess implements DataAccess{
-    public SqlDataAccess() throws DataAccessException{
-        configureDatabase();
+    public SqlDataAccess() {
+        try {
+            configureDatabase();
+        } catch (DataAccessException ex){
+            System.err.println("Database Creation error");
+        }
     }
 
     private void configureDatabase() throws DataAccessException {
@@ -187,8 +189,19 @@ public class SqlDataAccess implements DataAccess{
     }
 
     @Override
-    public void deleteAuth(String authToken) {
-
+    public void deleteAuth(String authToken) { // Drop row from table
+        try(var conn = DatabaseManager.getConnection()){
+            var statement = conn.prepareStatement("SELECT username, authToken FROM auths WHERE authToken = ?");
+            statement.setString(1, authToken);
+            var rs = statement.executeQuery();
+            if(!rs.next()){
+            }
+            String userName = rs.getString("username");
+            return new AuthData(userName, authToken);
+        } catch(Exception ex){
+            System.err.println("getAuth problem");
+        }
+        return null;
     }
 
     @Override
