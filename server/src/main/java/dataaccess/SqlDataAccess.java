@@ -256,7 +256,7 @@ public class SqlDataAccess implements DataAccess{
     }
 
     @Override
-    public void updateGame(GameData updatedGame) throws Exception {
+    public void updateGame(GameData updatedGame) throws Exception { // Changes usernames and/or game
         try(var conn = DatabaseManager.getConnection()){
             var statement = conn.prepareStatement("UPDATE games SET whiteUsername = ?, blackUsername = ?, game = ? WHERE gameID = ?;");
             statement.setString(1, updatedGame.whiteUsername());
