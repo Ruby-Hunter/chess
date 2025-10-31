@@ -2,7 +2,6 @@ package dataaccess;
 
 import chess.ChessGame;
 import com.google.gson.Gson;
-import com.mysql.cj.log.Log;
 import datamodel.*;
 import org.mindrot.jbcrypt.BCrypt;
 import service.*;
@@ -31,34 +30,38 @@ public class SqlDataAccess implements DataAccess{
         }
         catch(DataAccessException | SQLException ex){
             System.err.print("Database configure error");
+            ex.printStackTrace();
         }
     }
 
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS users (
-              'username' varchar(128) NOT NULL,
-              'email' TEXT NOT NULL,
-              'password' TEXT NOT NULL,
-              PRIMARY KEY ('username')
+              username varchar(128) NOT NULL,
+              email TEXT NOT NULL,
+              password TEXT NOT NULL,
+              PRIMARY KEY (username)
+            );
             """,
 
             """
             CREATE TABLE IF NOT EXISTS auths (
-              'username' varchar(128) NOT NULL,
-              'authToken' TEXT NOT NULL,
-              PRIMARY KEY ('username'),
-              INDEX (authToken)
+              username varchar(128) NOT NULL,
+              authToken TEXT NOT NULL,
+              PRIMARY KEY (username),
+              INDEX(authToken)
+            );
             """,
 
             """
             CREATE TABLE IF NOT EXISTS games (
-              'gameID' int NOT NULL,
-              'whiteUsername' TEXT,
-              'blackUsername' TEXT,
-              'gameName' varchar(128) NOT NULL,
-              'game' TEXT NOT NULL,
-              PRIMARY KEY ('gameID')
+              gameID int NOT NULL,
+              whiteUsername TEXT,
+              blackUsername TEXT,
+              gameName varchar(128) NOT NULL,
+              game TEXT NOT NULL,
+              PRIMARY KEY (gameID)
+            );
             """
     };
 
@@ -66,35 +69,35 @@ public class SqlDataAccess implements DataAccess{
         return BCrypt.hashpw(clearTextPassword, BCrypt.gensalt());
     }
 
-    boolean verifyUser(String username, String providedClearTextPassword, String hashedPassword) {
+    boolean verifyUser(String providedClearTextPassword, String hashedPassword) {
         return BCrypt.checkpw(providedClearTextPassword, hashedPassword);
-    }
-
-    String readHashedPasswordFromDatabase(String username){
-        try(var conn = DatabaseManager.getConnection()){
-            var statement = conn.prepareStatement("SELECT password FROM users WHERE username = ?");
-            statement.setString(1, username);
-            var rs = statement.executeQuery();
-            rs.next();
-            return rs.getString(0);
-        } catch (Exception ex) {
-            throw new RuntimeException(ex);
-        }
     }
 
     @Override
     public void clear() {
-
+        try(var conn = DatabaseManager.getConnection()){
+            try(var statement = conn.createStatement()){
+                statement.executeUpdate("TRUNCATE TABLE users;");
+                statement.executeUpdate("TRUNCATE TABLE games;");
+                statement.executeUpdate("TRUNCATE TABLE auths;");
+            }
+        } catch (SQLException ex){
+            System.err.println("SQL clear problem");
+        } catch(Exception ex){
+            System.err.println("clear problem");
+        }
     }
 
     @Override
     public void createUser(UserData user) {
         try(var conn = DatabaseManager.getConnection()){
-            var statement = conn.prepareStatement("INSERT INTO users VALUES (?, ?, ?)");
+            var statement = conn.prepareStatement("INSERT INTO users VALUES (?, ?, ?);");
             statement.setString(1, user.username());
             statement.setString(2, user.email());
             statement.setString(3, encryptPassword(user.password()));
             statement.executeUpdate();
+        } catch (SQLException ex){
+            System.err.println("SQL createUser problem");
         } catch(Exception ex){
             System.err.println("createUser problem");
         }
@@ -103,10 +106,12 @@ public class SqlDataAccess implements DataAccess{
     @Override
     public void createAuth(AuthData auth) {
         try(var conn = DatabaseManager.getConnection()){
-            var statement = conn.prepareStatement("INSERT INTO auths VALUES (?, ?)");
+            var statement = conn.prepareStatement("INSERT INTO auths VALUES (?, ?);");
             statement.setString(1, auth.username());
             statement.setString(2, auth.authToken());
             statement.executeUpdate();
+        } catch (SQLException ex){
+            System.err.println("SQL AuthData problem");
         } catch(Exception ex){
             System.err.println("createAuth problem");
         }
@@ -115,13 +120,15 @@ public class SqlDataAccess implements DataAccess{
     @Override
     public void createGame(GameData gameData) {
         try(var conn = DatabaseManager.getConnection()){
-            var statement = conn.prepareStatement("INSERT INTO games VALUES (?, ?, ?, ?, ?)");
+            var statement = conn.prepareStatement("INSERT INTO games VALUES (?, ?, ?, ?, ?);");
             statement.setInt(1, gameData.gameID());
             statement.setNull(2, Types.LONGNVARCHAR);
             statement.setNull(3, Types.LONGNVARCHAR);
             statement.setString(4, gameData.gameName());
             statement.setString(5, new Gson().toJson(gameData.game()));
             statement.executeUpdate();
+        } catch (SQLException ex){
+            System.err.println("SQL createGame problem");
         } catch(Exception ex){
             System.err.println("createAuth problem");
         }
@@ -130,20 +137,17 @@ public class SqlDataAccess implements DataAccess{
     @Override
     public UserData getUser(LoginData login) {
         try(var conn = DatabaseManager.getConnection()){
-            var statement = conn.prepareStatement("SELECT username, email, password FROM users WHERE username = ?");
+            var statement = conn.prepareStatement("SELECT username, email, password FROM users WHERE username = ?;");
             statement.setString(1, login.username());
-            var rs = statement.executeQuery();
-            if(!rs.next()){
-                return null;
-            }
-            String email = rs.getString("email");
-            String hashedPassword = rs.getString("password");
-            if(!verifyUser(login.username(), login.password(), hashedPassword)){
+            try(var rs = statement.executeQuery()){
+                if(!rs.next()){
+                    return null;
+                }
+                String email = rs.getString("email");
                 return new UserData(login.username(), email, login.password());
             }
-            else{
-                throw new UnauthorizedException("unauthorized");
-            }
+        } catch (SQLException ex){
+            System.err.println("SQL getUser problem");
         } catch(Exception ex){
             System.err.println("getUser problem");
         }
@@ -153,14 +157,17 @@ public class SqlDataAccess implements DataAccess{
     @Override
     public AuthData getAuth(String authToken) {
         try(var conn = DatabaseManager.getConnection()){
-            var statement = conn.prepareStatement("SELECT username, authToken FROM auths WHERE authToken = ?");
+            var statement = conn.prepareStatement("SELECT username, authToken FROM auths WHERE authToken = ?;");
             statement.setString(1, authToken);
-            var rs = statement.executeQuery();
-            if(!rs.next()){
-                return null;
+            try(var rs = statement.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+                String userName = rs.getString("username");
+                return new AuthData(userName, authToken);
             }
-            String userName = rs.getString("username");
-            return new AuthData(userName, authToken);
+        } catch (SQLException ex){
+            System.err.println("SQL getAuth problem");
         } catch(Exception ex){
             System.err.println("getAuth problem");
         }
@@ -170,18 +177,19 @@ public class SqlDataAccess implements DataAccess{
     @Override
     public GameData getGame(Integer gameID) {
         try(var conn = DatabaseManager.getConnection()){
-            var statement = conn.prepareStatement("SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games WHERE gameID = ?");
+            var statement = conn.prepareStatement("SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games WHERE gameID = ?;");
             statement.setInt(1, gameID);
-            var rs = statement.executeQuery();
-            if(!rs.next()){
-                return null;
+            try(var rs = statement.executeQuery()) {
+                if (!rs.next()) {
+                    return null;
+                }
+                String whiteUsername = rs.getString("whiteUsername");
+                String blackUsername = rs.getString("blackUsername");
+                String gameName = rs.getString("gameName");
+                String gameJson = rs.getString("game");
+                ChessGame game = new Gson().fromJson(gameJson, ChessGame.class);
+                return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
             }
-            String whiteUsername = rs.getString("whiteUsername");
-            String blackUsername = rs.getString("blackUsername");
-            String gameName = rs.getString("gameName");
-            String gameJson = rs.getString("game");
-            ChessGame game = new Gson().fromJson(gameJson, ChessGame.class);
-            return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
         } catch(Exception ex){
             System.err.println("getGame problem");
         }
@@ -191,7 +199,7 @@ public class SqlDataAccess implements DataAccess{
     @Override
     public void deleteAuth(String authToken) { // Drop row from table
         try(var conn = DatabaseManager.getConnection()){
-            var statement = conn.prepareStatement("DELETE FROM auths where authToken = ?");
+            var statement = conn.prepareStatement("DELETE FROM auths where authToken = ?;");
             statement.setString(1, authToken);
             statement.executeUpdate();
         } catch(Exception ex){
