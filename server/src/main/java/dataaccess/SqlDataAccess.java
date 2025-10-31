@@ -1,5 +1,6 @@
 package dataaccess;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import com.mysql.cj.log.Log;
 import datamodel.*;
@@ -159,13 +160,29 @@ public class SqlDataAccess implements DataAccess{
             String userName = rs.getString("username");
             return new AuthData(userName, authToken);
         } catch(Exception ex){
-            System.err.println("getUser problem");
+            System.err.println("getAuth problem");
         }
         return null;
     }
 
     @Override
     public GameData getGame(Integer gameID) {
+        try(var conn = DatabaseManager.getConnection()){
+            var statement = conn.prepareStatement("SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games WHERE gameID = ?");
+            statement.setInt(1, gameID);
+            var rs = statement.executeQuery();
+            if(!rs.next()){
+                return null;
+            }
+            String whiteUsername = rs.getString("whiteUsername");
+            String blackUsername = rs.getString("blackUsername");
+            String gameName = rs.getString("gameName");
+            String gameJson = rs.getString("game");
+            ChessGame game = new Gson().fromJson(gameJson, ChessGame.class);
+            return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
+        } catch(Exception ex){
+            System.err.println("getGame problem");
+        }
         return null;
     }
 
