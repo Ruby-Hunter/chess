@@ -251,32 +251,56 @@ public class Client {
         System.out.println("\u001b[30;100;1m 7 \u001b[34;40;1m P \u001b[34;107;1m P \u001b[34;40;1m P " + //Black Pawns
                 "\u001b[34;107;1m P \u001b[34;40;1m P \u001b[34;107;1m P \u001b[34;40;1m P " +
                 "\u001b[34;107;1m P \u001b[30;100;1m 7 \u001b[;;0m");
-        System.out.println("\u001b[30;100;1m 6 \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   " +
+
+        System.out.println("\u001b[30;100;1m 6 \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   " +//W
                 "\u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001b[30;100;1m 6 \u001b[;;0m");
-        System.out.println("\u001b[30;100;1m 5 \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   " +
-                "\u001B[;40;1m   \u001B[;40;1m   \u001b[30;100;1m 5 \u001b[;;0m");
+        System.out.println("\u001b[30;100;1m 5 \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   " +//B
+                "\u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001b[30;100;1m 5 \u001b[;;0m");
         System.out.println("\u001b[30;100;1m 4 \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   " +
                 "\u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001b[30;100;1m 4 \u001b[;;0m");
-        System.out.println("\u001b[30;100;1m 3 \u001B[;40;1m   \u001B[;40;1m   \u001B[;40;1m   \u001B[;40;1m   \u001b[30;100;1m 3 \u001b[;;0m");
+        System.out.println("\u001b[30;100;1m 3 \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   " +
+                "\u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001b[30;100;1m 3 \u001b[;;0m");
+
         System.out.println("\u001b[30;100;1m 2 \u001b[31;107;1m P \u001b[31;40;1m P \u001b[31;107;1m P " + //White Pawns
                 "\u001b[31;40;1m P \u001b[31;107;1m P \u001b[31;40;1m P \u001b[31;107;1m P " +
                 "\u001b[31;40;1m P \u001b[30;100;1m 2 \u001b[;;0m");
         System.out.println("\u001b[30;100;1m 1 \u001b[31;40;1m R \u001b[31;107;1m N \u001b[31;40;1m B " + //White
                 "\u001b[31;107;1m Q \u001b[31;40;1m K \u001b[31;107;1m B \u001b[31;40;1m N " +
                 "\u001b[31;107;1m R \u001b[30;100;1m 1 \u001b[;;0m");
-        System.out.println("\u001b[30;100;1m    a  b  c  d  e  f  g  h    \u001b[;;0m");
+        System.out.println("\u001b[30;100;1m    a  b  c  d  e  f  g  h    \u001b[;;0m\n");
+    }
 
+    private void print_board_black(){
+        System.out.println("\u001b[30;100;1m    h  g  f  e  d  c  b  a    \u001b[;;0m");
+        System.out.println("\u001b[30;100;1m 1 \u001b[31;107;1m R \u001b[31;40;1m N \u001b[31;107;1m B " + //White
+                "\u001b[31;40;1m K \u001b[31;107;1m Q \u001b[31;40;1m B \u001b[31;107;1m N " +
+                "\u001b[31;40;1m R \u001b[30;100;1m 1 \u001b[;;0m");
+        System.out.println("\u001b[30;100;1m 2 \u001b[31;40;1m P \u001b[31;107;1m P \u001b[31;40;1m P " + //White Pawns
+                "\u001b[31;107;1m P \u001b[31;40;1m P \u001b[31;107;1m P \u001b[31;40;1m P " +
+                "\u001b[31;107;1m P \u001b[30;100;1m 2 \u001b[;;0m");
 
+        System.out.println("\u001b[30;100;1m 3 \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   " +//W
+                "\u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001b[30;100;1m 3 \u001b[;;0m");
+        System.out.println("\u001b[30;100;1m 4 \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   " +//B
+                "\u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001b[30;100;1m 4 \u001b[;;0m");
+        System.out.println("\u001b[30;100;1m 5 \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   " +//W
+                "\u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001b[30;100;1m 5 \u001b[;;0m");
+        System.out.println("\u001b[30;100;1m 6 \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   " +//B
+                "\u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001b[30;100;1m 6 \u001b[;;0m");
+
+        System.out.println("\u001b[30;100;1m 7 \u001b[34;107;1m P \u001b[34;40;1m P \u001b[34;107;1m P " + //Black Pawns
+                "\u001b[34;40;1m P \u001b[34;107;1m P \u001b[34;40;1m P \u001b[34;107;1m P " +
+                "\u001b[34;40;1m P \u001b[30;100;1m 7 \u001b[;;0m");
+        System.out.println("\u001b[30;100;1m 8 \u001b[34;40;1m R \u001b[34;107;1m N \u001b[34;40;1m B " + //Black
+                "\u001b[34;107;1m K \u001b[34;40;1m Q \u001b[34;107;1m B \u001b[34;40;1m N " +
+                "\u001b[34;107;1m R \u001b[30;100;1m 8 \u001b[;;0m");
+        System.out.println("\u001b[30;100;1m    h  g  f  e  d  c  b  a    \u001b[;;0m\n");
     }
 
     @Test
     void print_board_test(){
         print_board_white();
+        print_board_black();
         Assertions.assertTrue(true);
-    }
-
-    private void print_board_black(){
-        System.out.println(" abcdefgh ");
-        System.out.println(" RNBQK ");
     }
 }
