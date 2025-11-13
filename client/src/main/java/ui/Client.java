@@ -1,6 +1,8 @@
 package ui;
 
 import chess.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Scanner;
@@ -116,7 +118,14 @@ public class Client {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "m", "move" -> "move";
-                case "s", "show" -> "show";
+                case "s", "show" -> {
+                    if(color == null || color == ChessGame.TeamColor.WHITE){
+                        print_board_white();
+                    } else{
+                        print_board_black();
+                    }
+                    yield "show";
+                }
                 case "q", "quit" -> {
                     res = "quit";
                     yield "quit";
@@ -142,7 +151,10 @@ public class Client {
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "s", "show" -> "show";
+                case "s", "show" -> {
+                    print_board_white();
+                    yield "show";
+                }
                 case "q", "quit" -> {
                     res = "quit";
                     yield "quit";
@@ -169,21 +181,20 @@ public class Client {
                 state = game_state.LOGGED_OUT;
                 logout_help();
             case LOGGED_OUT:
-                System.out.print("[LOGGED OUT: Not playing] >>> ");
+                System.out.print("\n[LOGGED OUT: Not playing] >>> ");
                 System.out.println(logged_out_eval(scanner.nextLine()));
                 break;
             case LOGGED_IN:
-                System.out.print("[LOGGED IN: Not playing] >>> ");
+                System.out.print("\n[LOGGED IN: Not playing] >>> ");
                 System.out.println(logged_in_eval(scanner.nextLine()));
                 break;
             case PLAYING:
-                System.out.printf("[PLAYING: %s] >>> ", color);
-                print_board();
+                System.out.printf("\n[PLAYING: %s] >>> ", color);
                 System.out.println(playing_eval(scanner.nextLine()));
                 break;
             case OBSERVING:
-                System.out.print("[OBSERVING] >>> ");
-                print_board();
+                System.out.print("\n[OBSERVING] >>> ");
+                print_board_white();
                 System.out.println(observing_eval(scanner.nextLine()));
                 break;
             default:
@@ -225,7 +236,47 @@ public class Client {
         System.out.println("  \u001b[33;49;1m\"h\"/\"help\" \u001b[34;49;1m- with possible commands\u001b[;;0m");
     }
 
-    private void print_board(){
+    // Sides: [30;100;1m
+    // Blank White: [;107;1m
+    // Blank Black: [;40;1m
+    // White on White: [34;107;1m
+    // White on Black: [34;40;1m
+    // Black on White: [31;107;1m
+    // Black on Black: [31;40;1m
+    private void print_board_white(){
+        System.out.println("\u001b[30;100;1m    a  b  c  d  e  f  g  h    \u001b[;;0m");
+        System.out.println("\u001b[30;100;1m 8 \u001b[34;107;1m R \u001b[34;40;1m N \u001b[34;107;1m B " + //Black
+                "\u001b[34;40;1m Q \u001b[34;107;1m K \u001b[34;40;1m B \u001b[34;107;1m N " +
+                "\u001b[34;40;1m R \u001b[30;100;1m 8 \u001b[;;0m");
+        System.out.println("\u001b[30;100;1m 7 \u001b[34;40;1m P \u001b[34;107;1m P \u001b[34;40;1m P " + //Black Pawns
+                "\u001b[34;107;1m P \u001b[34;40;1m P \u001b[34;107;1m P \u001b[34;40;1m P " +
+                "\u001b[34;107;1m P \u001b[30;100;1m 7 \u001b[;;0m");
+        System.out.println("\u001b[30;100;1m 6 \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   " +
+                "\u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001b[30;100;1m 6 \u001b[;;0m");
+        System.out.println("\u001b[30;100;1m 5 \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   " +
+                "\u001B[;40;1m   \u001B[;40;1m   \u001b[30;100;1m 5 \u001b[;;0m");
+        System.out.println("\u001b[30;100;1m 4 \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   " +
+                "\u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001b[30;100;1m 4 \u001b[;;0m");
+        System.out.println("\u001b[30;100;1m 3 \u001B[;40;1m   \u001B[;40;1m   \u001B[;40;1m   \u001B[;40;1m   \u001b[30;100;1m 3 \u001b[;;0m");
+        System.out.println("\u001b[30;100;1m 2 \u001b[31;107;1m P \u001b[31;40;1m P \u001b[31;107;1m P " + //White Pawns
+                "\u001b[31;40;1m P \u001b[31;107;1m P \u001b[31;40;1m P \u001b[31;107;1m P " +
+                "\u001b[31;40;1m P \u001b[30;100;1m 2 \u001b[;;0m");
+        System.out.println("\u001b[30;100;1m 1 \u001b[31;40;1m R \u001b[31;107;1m N \u001b[31;40;1m B " + //White
+                "\u001b[31;107;1m Q \u001b[31;40;1m K \u001b[31;107;1m B \u001b[31;40;1m N " +
+                "\u001b[31;107;1m R \u001b[30;100;1m 1 \u001b[;;0m");
+        System.out.println("\u001b[30;100;1m    a  b  c  d  e  f  g  h    \u001b[;;0m");
 
+
+    }
+
+    @Test
+    void print_board_test(){
+        print_board_white();
+        Assertions.assertTrue(true);
+    }
+
+    private void print_board_black(){
+        System.out.println(" abcdefgh ");
+        System.out.println(" RNBQK ");
     }
 }
