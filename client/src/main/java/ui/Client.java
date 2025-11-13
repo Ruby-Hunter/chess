@@ -20,9 +20,12 @@ public class Client {
         state = game_state.INIT;
     }
 
-    public void read_input(){
+    // Reads the input and acts based on it. Return 0 if
+    private int read_input(){
         Scanner scanner = new Scanner(System.in);
         String line = scanner.nextLine();
+        String[] tokens = line.toLowerCase().split(" ");
+        String cmd = (tokens.length > 0) ? tokens[0] : "help";
     }
 
     public void tick(){
@@ -32,6 +35,7 @@ public class Client {
                 state = game_state.LOGGED_OUT;
             case LOGGED_OUT:
                 System.out.print("[LOGGED OUT: Not playing] >>> ");
+                read_input();
                 break;
             case LOGGED_IN:
                 System.out.print("[LOGGED IN: Not playing] >>> ");
