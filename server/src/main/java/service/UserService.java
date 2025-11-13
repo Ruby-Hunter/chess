@@ -5,7 +5,6 @@ import dataaccess.DataAccess;
 import datamodel.*;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.UUID;
 
 public class UserService {
