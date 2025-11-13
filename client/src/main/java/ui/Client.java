@@ -2,6 +2,7 @@ package ui;
 
 import chess.*;
 
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Client {
@@ -11,6 +12,8 @@ public class Client {
 
     private game_state state;
     private ChessGame.TeamColor color;
+    private String res;
+    private Scanner scanner;
 
     public Client(){
         init();
@@ -18,14 +21,69 @@ public class Client {
 
     private void init(){
         state = game_state.INIT;
+        res = "";
+        scanner = new Scanner(System.in);
     }
 
-    // Reads the input and acts based on it. Return 0 if
-    private int read_input(){
-        Scanner scanner = new Scanner(System.in);
-        String line = scanner.nextLine();
-        String[] tokens = line.toLowerCase().split(" ");
-        String cmd = (tokens.length > 0) ? tokens[0] : "help";
+    public void loop(){
+        while(!res.equals("quit")){
+            tick();
+        }
+    }
+
+    // Reads the input and acts based on it when logged out
+    private String logged_out_eval(String line){
+        try{
+            String[] tokens = line.toLowerCase().split(" ");
+            String cmd = (tokens.length > 0) ? tokens[0] : "help";
+            String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
+            return switch (cmd) {
+                case "r", "register" -> "register";
+                case "l", "login" -> "login";
+                case "q", "quit" -> {
+                    res = "quit";
+                    yield "quit";
+                }
+                case "h", "help" -> {
+                    logout_help();
+                    yield "help";
+                }
+                default -> "default";
+            };
+        } catch (Exception ex){
+            System.err.print("logged_out_eval error");
+            return ex.getMessage();
+        }
+    }
+
+    private String logged_in_eval(String line){
+        try{
+            String[] tokens = line.toLowerCase().split(" ");
+            String cmd = (tokens.length > 0) ? tokens[0] : "help";
+            String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
+            return switch (cmd) {
+                case "c", "create" -> "create";
+                case "li", "list" -> "list";
+                case "j", "join" -> "join";
+                case "o", "observe" -> "observe";
+                case "lo", "logout" -> {
+                    state = game_state.LOGGED_OUT;
+                    yield "logout";
+                }
+                case "q", "quit" -> {
+                    res = "quit";
+                    yield "quit";
+                }
+                case "h", "help" -> {
+                    login_help();
+                    yield "help";
+                }
+                default -> "default";
+            };
+        } catch (Exception ex){
+            System.err.print("logged_out_eval error");
+            return ex.getMessage();
+        }
     }
 
     public void tick(){
@@ -35,10 +93,11 @@ public class Client {
                 state = game_state.LOGGED_OUT;
             case LOGGED_OUT:
                 System.out.print("[LOGGED OUT: Not playing] >>> ");
-                read_input();
+                System.out.println(logged_out_eval(scanner.nextLine()));
                 break;
             case LOGGED_IN:
                 System.out.print("[LOGGED IN: Not playing] >>> ");
+                System.out.println(logged_in_eval(scanner.nextLine()));
                 break;
             case PLAYING:
                 System.out.printf("[PLAYING: %s] >>> ", color);
@@ -51,19 +110,19 @@ public class Client {
         }
     }
 
-    public void login_help(){
+    private void logout_help(){
+        System.out.println("  \"r\"/\"register\" <USERNAME> <PASSWORD> <EMAIL> - to create an account");
+        System.out.println("  \"l\"/\"login\" <USERNAME> <PASSWORD> - to play chess");
+        System.out.println("  \"q\"/\"quit\" - playing chess");
+        System.out.println("  \"h\"/\"help\" - with possible commands");
+    }
+
+    private void login_help(){
         System.out.println("  \"c\"/\"create\" <NAME> - a game");
         System.out.println("  \"li\"/\"list\" - games");
         System.out.println("  \"j\"/\"join\" <ID> [WHITE|BLACK] - a game");
         System.out.println("  \"o\"/\"observe\" <ID> - a game");
         System.out.println("  \"lo\"/\"logout\" - when you are done");
-        System.out.println("  \"q\"/\"quit\" - playing chess");
-        System.out.println("  \"h\"/\"help\" - with possible commands");
-    }
-
-    public void logout_help(){
-        System.out.println("  \"r\"/\"register\" <USERNAME> <PASSWORD> <EMAIL> - to create an account");
-        System.out.println("  \"l\"/\"login\" <USERNAME> <PASSWORD> - to play chess");
         System.out.println("  \"q\"/\"quit\" - playing chess");
         System.out.println("  \"h\"/\"help\" - with possible commands");
     }

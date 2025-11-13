@@ -8,7 +8,7 @@ public class Main {
 //        System.out.println("♕ 240 Chess Client: " + piece);
         Client client = new Client();
 //        while(true){
-            client.tick();
+            client.loop();
 //        }
     }
 }
