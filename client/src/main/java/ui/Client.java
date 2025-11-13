@@ -38,8 +38,14 @@ public class Client {
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "r", "register" -> "register";
-                case "l", "login" -> "login";
+                case "r", "register" -> {
+                    state = game_state.LOGGED_IN;
+                    yield "register";
+                }
+                case "l", "login" -> {
+                    state = game_state.LOGGED_IN;
+                    yield "login";
+                }
                 case "q", "quit" -> {
                     res = "quit";
                     yield "quit";
@@ -48,7 +54,10 @@ public class Client {
                     logout_help();
                     yield "help";
                 }
-                default -> "default";
+                default -> {
+                    logout_help();
+                    yield "bad command";
+                }
             };
         } catch (Exception ex){
             System.err.print("logged_out_eval error");
@@ -64,8 +73,14 @@ public class Client {
             return switch (cmd) {
                 case "c", "create" -> "create";
                 case "li", "list" -> "list";
-                case "j", "join" -> "join";
-                case "o", "observe" -> "observe";
+                case "j", "join" -> {
+                    state = game_state.PLAYING;
+                    yield "join";
+                }
+                case "o", "observe" -> {
+                    state = game_state.OBSERVING;
+                    yield "observe";
+                }
                 case "lo", "logout" -> {
                     state = game_state.LOGGED_OUT;
                     yield "logout";
@@ -78,7 +93,10 @@ public class Client {
                     login_help();
                     yield "help";
                 }
-                default -> "default";
+                default -> {
+                    login_help();
+                    yield "bad command";
+                }
             };
         } catch (Exception ex){
             System.err.print("logged_out_eval error");
@@ -111,6 +129,7 @@ public class Client {
     }
 
     private void logout_help(){
+        System.out.println(" Commands:");
         System.out.println("  \"r\"/\"register\" <USERNAME> <PASSWORD> <EMAIL> - to create an account");
         System.out.println("  \"l\"/\"login\" <USERNAME> <PASSWORD> - to play chess");
         System.out.println("  \"q\"/\"quit\" - playing chess");
@@ -125,5 +144,9 @@ public class Client {
         System.out.println("  \"lo\"/\"logout\" - when you are done");
         System.out.println("  \"q\"/\"quit\" - playing chess");
         System.out.println("  \"h\"/\"help\" - with possible commands");
+    }
+
+    private void print_board(){
+
     }
 }
