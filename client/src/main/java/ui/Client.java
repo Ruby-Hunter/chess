@@ -40,10 +40,12 @@ public class Client {
             return switch (cmd) {
                 case "r", "register" -> {
                     state = game_state.LOGGED_IN;
+                    login_help();
                     yield "register";
                 }
                 case "l", "login" -> {
                     state = game_state.LOGGED_IN;
+                    login_help();
                     yield "login";
                 }
                 case "q", "quit" -> {
@@ -75,14 +77,17 @@ public class Client {
                 case "li", "list" -> "list";
                 case "j", "join" -> {
                     state = game_state.PLAYING;
+                    playing_help();
                     yield "join";
                 }
                 case "o", "observe" -> {
                     state = game_state.OBSERVING;
+                    playing_help();
                     yield "observe";
                 }
                 case "lo", "logout" -> {
                     state = game_state.LOGGED_OUT;
+                    logout_help();
                     yield "logout";
                 }
                 case "q", "quit" -> {
@@ -104,11 +109,65 @@ public class Client {
         }
     }
 
-    public void tick(){
+    private String playing_eval(String line){
+        try{
+            String[] tokens = line.toLowerCase().split(" ");
+            String cmd = (tokens.length > 0) ? tokens[0] : "help";
+            String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
+            return switch (cmd) {
+                case "m", "move" -> "move";
+                case "s", "show" -> "show";
+                case "q", "quit" -> {
+                    res = "quit";
+                    yield "quit";
+                }
+                case "h", "help" -> {
+                    playing_help();
+                    yield "help";
+                }
+                default -> {
+                    playing_help();
+                    yield "bad command";
+                }
+            };
+        } catch (Exception ex){
+            System.err.print("playing_eval error");
+            return ex.getMessage();
+        }
+    }
+
+    private String observing_eval(String line){
+        try{
+            String[] tokens = line.toLowerCase().split(" ");
+            String cmd = (tokens.length > 0) ? tokens[0] : "help";
+            String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
+            return switch (cmd) {
+                case "s", "show" -> "show";
+                case "q", "quit" -> {
+                    res = "quit";
+                    yield "quit";
+                }
+                case "h", "help" -> {
+                    observing_help();
+                    yield "help";
+                }
+                default -> {
+                    observing_help();
+                    yield "bad command";
+                }
+            };
+        } catch (Exception ex){
+            System.err.print("observing_eval error");
+            return ex.getMessage();
+        }
+    }
+
+    public void tick() {
         switch(state){
             case INIT:
                 System.out.println("Welcome to chess! Type \"Help\" to list commands.");
                 state = game_state.LOGGED_OUT;
+                logout_help();
             case LOGGED_OUT:
                 System.out.print("[LOGGED OUT: Not playing] >>> ");
                 System.out.println(logged_out_eval(scanner.nextLine()));
@@ -119,9 +178,13 @@ public class Client {
                 break;
             case PLAYING:
                 System.out.printf("[PLAYING: %s] >>> ", color);
+                print_board();
+                System.out.println(playing_eval(scanner.nextLine()));
                 break;
             case OBSERVING:
                 System.out.print("[OBSERVING] >>> ");
+                print_board();
+                System.out.println(observing_eval(scanner.nextLine()));
                 break;
             default:
                 throw new IllegalStateException("No client state error");
@@ -129,21 +192,37 @@ public class Client {
     }
 
     private void logout_help(){
-        System.out.println(" Commands:");
-        System.out.println("  \"r\"/\"register\" <USERNAME> <PASSWORD> <EMAIL> - to create an account");
-        System.out.println("  \"l\"/\"login\" <USERNAME> <PASSWORD> - to play chess");
-        System.out.println("  \"q\"/\"quit\" - playing chess");
-        System.out.println("  \"h\"/\"help\" - with possible commands");
+        System.out.println(" \u001b[;;4mCommands:\u001b[;;0m");
+        System.out.println("  \u001b[33;49;1m\"r\"/\"register\" <USERNAME> <PASSWORD> <EMAIL> \u001b[34;49;1m- to create an account");
+        System.out.println("  \u001b[33;49;1m\"l\"/\"login\" <USERNAME> <PASSWORD> \u001b[34;49;1m- to play chess");
+        System.out.println("  \u001b[33;49;1m\"q\"/\"quit\" \u001b[34;49;1m- playing chess");
+        System.out.println("  \u001b[33;49;1m\"h\"/\"help\" \u001b[34;49;1m- with possible commands\u001b[;;0m");
     }
 
     private void login_help(){
-        System.out.println("  \"c\"/\"create\" <NAME> - a game");
-        System.out.println("  \"li\"/\"list\" - games");
-        System.out.println("  \"j\"/\"join\" <ID> [WHITE|BLACK] - a game");
-        System.out.println("  \"o\"/\"observe\" <ID> - a game");
-        System.out.println("  \"lo\"/\"logout\" - when you are done");
-        System.out.println("  \"q\"/\"quit\" - playing chess");
-        System.out.println("  \"h\"/\"help\" - with possible commands");
+        System.out.println(" \u001b[;;4mCommands:\u001b[;;0m");
+        System.out.println("  \u001b[33;49;1m\"c\"/\"create\" <NAME> \u001b[34;49;1m- a game");
+        System.out.println("  \u001b[33;49;1m\"li\"/\"list\" \u001b[34;49;1m- games");
+        System.out.println("  \u001b[33;49;1m\"j\"/\"join\" <ID> [WHITE|BLACK] \u001b[34;49;1m- a game");
+        System.out.println("  \u001b[33;49;1m\"o\"/\"observe\" <ID> \u001b[34;49;1m- a game");
+        System.out.println("  \u001b[33;49;1m\"lo\"/\"logout\" \u001b[34;49;1m- when you are done");
+        System.out.println("  \u001b[33;49;1m\"q\"/\"quit\" \u001b[34;49;1m- playing chess");
+        System.out.println("  \u001b[33;49;1m\"h\"/\"help\" \u001b[34;49;1m- with possible commands\u001b[;;0m");
+    }
+
+    private void playing_help(){
+        System.out.println(" \u001b[;;4mCommands:\u001b[;;0m");
+        System.out.println("  \u001b[33;49;1m\"m\"/\"move\" <POS1> <POS2> \u001b[34;49;1m- a piece");
+        System.out.println("  \u001b[33;49;1m\"s\"/\"show\" \u001b[34;49;1m- the board");
+        System.out.println("  \u001b[33;49;1m\"q\"/\"quit\" \u001b[34;49;1m- playing chess");
+        System.out.println("  \u001b[33;49;1m\"h\"/\"help\" \u001b[34;49;1m- with possible commands\u001b[;;0m");
+    }
+
+    private void observing_help(){
+        System.out.println(" \u001b[;;4mCommands:\u001b[;;0m");
+        System.out.println("  \u001b[33;49;1m\"s\"/\"show\" \u001b[34;49;1m- the board");
+        System.out.println("  \u001b[33;49;1m\"q\"/\"quit\" \u001b[34;49;1m- playing chess");
+        System.out.println("  \u001b[33;49;1m\"h\"/\"help\" \u001b[34;49;1m- with possible commands\u001b[;;0m");
     }
 
     private void print_board(){
