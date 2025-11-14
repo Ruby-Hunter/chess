@@ -2,14 +2,16 @@ package ui;
 
 import com.google.gson.Gson;
 import datamodel.*;
+import exception.ResponseException;
 
 import java.net.URI;
-import java.net.http.*;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.HashSet;
-import exception.ResponseException;
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
@@ -17,17 +19,27 @@ public class ServerFacade {
 
     public ServerFacade(String url){ serverURL = url; }
 
-    public AuthData register(UserData user) throws Exception {
+    public AuthData register(UserData user) throws ResponseException {
         var request = buildRequest("POST", "/user", user);
         var response = sendRequest(request);
-        return
+        return handleResponse(response, AuthData.class);
     }
 
-    public AuthData login(LoginData login){return null;}
+    public AuthData login(LoginData login) throws ResponseException {
+        var request = buildRequest("POST", "/session", login);
+        var response = sendRequest(request);
+        return handleResponse(response, AuthData.class);
+    }
 
-    public void logout(String authToken){}
+    public void logout(String authToken) throws ResponseException {
+        var request = buildRequest("DELETE", "/session", authToken);
+        var response = sendRequest(request);
+        handleResponse(response, null);
+    }
 
-    public Integer createGame(String authToken, String gameName){return null;}
+    public Integer createGame(String authToken, String gameName){
+        var request = buildRequest("POST", "/game", authToken)
+    }
 
     public HashSet<GameData> listGames(String authToken){return null;}
 
@@ -53,7 +65,7 @@ public class ServerFacade {
         }
     }
 
-    private HttpResponse<String> sendRequest(HttpRequest request) throws Exception {
+    private HttpResponse<String> sendRequest(HttpRequest request) throws ResponseException {
         try{
             return client.send(request, BodyHandlers.ofString());
         } catch (Exception ex){
