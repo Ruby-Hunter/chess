@@ -1,9 +1,11 @@
 package service;
 
-import dataaccess.*;
-import datamodel.*;
-import service.*;
-import org.eclipse.jetty.server.Authentication;
+import dataaccess.DataAccess;
+import dataaccess.MemoryDataAccess;
+import datamodel.CreateRequest;
+import datamodel.JoinData;
+import datamodel.LoginData;
+import datamodel.UserData;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -74,8 +76,8 @@ class UserServiceTest {
         UserService service = new UserService(db);
         var user = new UserData("henry", "henryshenry@henry.org", "HEN123");
         var authData = service.register(user);
-        service.createGame(authData.authToken(), "Game1");
-        service.createGame(authData.authToken(), "Game2");
+        service.createGame(new CreateRequest(authData.authToken(), "Game1"));
+        service.createGame(new CreateRequest(authData.authToken(), "Game2"));
         var games = service.listGames(authData.authToken());
         assertNotNull(games);
         assertFalse(games.isEmpty());
@@ -98,7 +100,7 @@ class UserServiceTest {
         UserService service = new UserService(db);
         var user = new UserData("henry", "henryshenry@henry.org", "HEN123");
         var authData = service.register(user);
-        var gameID = service.createGame(authData.authToken(), "Game1");
+        var gameID = service.createGame(new CreateRequest(authData.authToken(), "Game1"));
         assertNotNull(gameID);
         assertNotNull(db.getGame(gameID));
         assertEquals(db.getGame(gameID).gameID(), gameID);
@@ -111,7 +113,7 @@ class UserServiceTest {
         var user = new UserData("henry", "henryshenry@henry.org", "HEN123");
         var authData = service.register(user);
         assertThrows(BadRequestException.class,
-                () -> service.createGame(authData.authToken(), null)
+                () -> service.createGame(new CreateRequest(authData.authToken(), null))
         );
     }
 
@@ -121,7 +123,7 @@ class UserServiceTest {
         UserService service = new UserService(db);
         var user = new UserData("henry", "henryshenry@henry.org", "HEN123");
         var authData = service.register(user);
-        var gameID = service.createGame(authData.authToken(), "Game1");
+        var gameID = service.createGame(new CreateRequest(authData.authToken(), "Game1"));
         service.joinGame(authData.authToken(), new JoinData("WHITE", gameID));
         assertNotNull(db.getGame(gameID).whiteUsername());
         assertNull(db.getGame(gameID).blackUsername());
@@ -138,7 +140,7 @@ class UserServiceTest {
         UserService service = new UserService(db);
         var user = new UserData("henry", "henryshenry@henry.org", "HEN123");
         var authData = service.register(user);
-        var gameID = service.createGame(authData.authToken(), "Game1");
+        var gameID = service.createGame(new CreateRequest(authData.authToken(), "Game1"));
         service.joinGame(authData.authToken(), new JoinData("WHITE", gameID));
 
         var user2 = new UserData("henrietta", "henriettashenry@henry.org", "HEN123");
@@ -156,7 +158,7 @@ class UserServiceTest {
         var authData = service.register(user);
         var user2 = new UserData("henrietta", "henriettashenry@henry.org", "HEN123");
         service.register(user2);
-        var gameID = service.createGame(authData.authToken(), "Game1");
+        var gameID = service.createGame(new CreateRequest(authData.authToken(), "Game1"));
         assertNotNull(db.getGame(gameID));
         service.clear();
         assertNull(db.getUser(new LoginData(user.username(), user.password())));
@@ -173,7 +175,7 @@ class UserServiceTest {
         service.register(user2);
         service.clear();
         assertThrows(Exception.class,
-                () -> service.createGame(authData.authToken(), "Game1")
+                () -> service.createGame(new CreateRequest(authData.authToken(), "Game1"))
         );
     }
 }

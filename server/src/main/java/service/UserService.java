@@ -58,35 +58,35 @@ public class UserService {
         return dataAccess.listGames();
     }
 
-    public Integer createGame(String authToken, String gameName) throws Exception {
-        if(authToken == null  ||  gameName == null){
+    public Integer createGame(CreateRequest request) throws Exception {
+        if(request.authToken() == null  ||  request.gameName() == null){
             throw new BadRequestException("bad request");
         }
-        var auth = dataAccess.getAuth(authToken);
+        var auth = dataAccess.getAuth(request.authToken());
         if(auth == null){ // check if auth exists
             throw new UnauthorizedException("unauthorized");
         }
         int gameID = generateID();
-        var game = new GameData(gameID, null, null, gameName, new ChessGame());
+        var game = new GameData(gameID, null, null, request.gameName(), new ChessGame());
         dataAccess.createGame(game);
         return gameID;
     }
 
-    public void joinGame(String authToken, JoinData joinData) throws Exception {
-        if(authToken == null  ||  joinData.gameID() == null  ||  joinData.playerColor() == null
-                ||  !(joinData.playerColor().equals("WHITE")  ||  joinData.playerColor().equals("BLACK")) ){
+    public void joinGame(JoinRequest request) throws Exception {
+        if(request.authToken() == null  ||  request.joinData().gameID() == null  ||  request.joinData().playerColor() == null
+                ||  !(request.joinData().playerColor().equals("WHITE")  ||  request.joinData().playerColor().equals("BLACK")) ){
             throw new BadRequestException("bad request");
         }
-        var auth = dataAccess.getAuth(authToken);
+        var auth = dataAccess.getAuth(request.authToken());
         if(auth == null){ // check if auth exists
             throw new UnauthorizedException("unauthorized");
         }
-        GameData gameData = dataAccess.getGame(joinData.gameID());
+        GameData gameData = dataAccess.getGame(request.joinData().gameID());
         if(gameData == null){
             throw new BadRequestException("bad request");
         }
         GameData newGame;
-        if(joinData.playerColor().equals("WHITE")){
+        if(request.joinData().playerColor().equals("WHITE")){
             if(gameData.whiteUsername() != null){
                 throw new AlreadyTakenException("already taken");
             } else{

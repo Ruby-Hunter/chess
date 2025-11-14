@@ -1,10 +1,9 @@
 package server;
 
 import com.google.gson.Gson;
-import dataaccess.MemoryDataAccess;
 import dataaccess.SqlDataAccess;
 import datamodel.*;
-import io.javalin.*;
+import io.javalin.Javalin;
 import io.javalin.http.Context;
 import service.AlreadyTakenException;
 import service.BadRequestException;
@@ -111,7 +110,7 @@ public class Server {
             String reqJsonBody = ctx.body();
             Map gameMap = serializer.fromJson(reqJsonBody, Map.class);
             String gameName = (String)gameMap.get("gameName");
-            int gameID = userServ.createGame(auth, gameName);
+            int gameID = userServ.createGame(new CreateRequest(auth, gameName));
             var createGameResult = Map.of("gameID", gameID);
             ctx.result(serializer.toJson(createGameResult));
         } catch (BadRequestException ex){
@@ -132,7 +131,7 @@ public class Server {
             String auth = ctx.header("authorization");
             String reqJsonBody = ctx.body();
             JoinData joinData = serializer.fromJson(reqJsonBody, JoinData.class);
-            userServ.joinGame(auth, joinData);
+            userServ.joinGame(new JoinRequest(auth, joinData));
             ctx.result(serializer.toJson(null));
         } catch (BadRequestException ex){
             var msg = String.format("{ \"message\": \"Error: %s\" }", ex.getMessage());
