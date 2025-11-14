@@ -1,6 +1,9 @@
 package ui;
 
-import chess.*;
+import chess.ChessGame;
+import datamodel.AuthData;
+import datamodel.LoginData;
+import datamodel.UserData;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -15,16 +18,17 @@ public class Client {
     private game_state state;
     private ChessGame.TeamColor color;
     private String res;
-    private Scanner scanner;
+    private final Scanner scanner;
+    private final String url;
+    ServerFacade facade;
+    AuthData auth;
 
     public Client(){
-        init();
-    }
-
-    private void init(){
         state = game_state.INIT;
         res = "";
+        url = "localhost";
         scanner = new Scanner(System.in);
+        facade = new ServerFacade(url);
     }
 
     public void loop(){
@@ -41,11 +45,13 @@ public class Client {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "r", "register" -> {
+                    auth = facade.register(new UserData(params[0], params[1], params[2]));
                     state = game_state.LOGGED_IN;
                     login_help();
                     yield "register";
                 }
                 case "l", "login" -> {
+                    auth = facade.login(new LoginData(params[0], params[1]));
                     state = game_state.LOGGED_IN;
                     login_help();
                     yield "login";
