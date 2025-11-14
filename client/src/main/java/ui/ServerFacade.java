@@ -43,16 +43,22 @@ public class ServerFacade {
         return handleResponse(response, Integer.class);
     }
 
-    public HashSet<GameData> listGames(String authToken){
-        var request = buildRequest("GET", "/game")
-        return null;}
-
-    public void joinGame(JoinRequest joinRequest){
-        var request = buildRequest("PUT", "/game", )
+    public HashSet listGames(String authToken) throws ResponseException {
+        var request = buildRequest("GET", "/game", null, authToken);
+        var response = sendRequest(request);
+        return handleResponse(response, HashSet.class);
     }
 
-    public void clear(){
-        var request = buildRequest("DELETE", "/db")
+    public void joinGame(JoinRequest joinRequest) throws ResponseException {
+        var request = buildRequest("PUT", "/game", joinRequest.joinData(), joinRequest.authToken());
+        var response = sendRequest(request);
+        handleResponse(response, null);
+    }
+
+    public void clear() throws ResponseException {
+        var request = buildRequest("DELETE", "/db", null, null);
+        var response = sendRequest(request);
+        handleResponse(response, null);
     }
 
     private HttpRequest buildRequest(String method, String path, Object body, String authToken){
@@ -80,7 +86,7 @@ public class ServerFacade {
         try{
             return client.send(request, BodyHandlers.ofString());
         } catch (Exception ex){
-            throw new Exception("response exception");
+            throw new ResponseException(ResponseException.Code.ServerError, ex.getMessage());
         }
     }
 
