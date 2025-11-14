@@ -9,6 +9,7 @@ import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.HashSet;
+import exception.ResponseException;
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();
@@ -59,4 +60,24 @@ public class ServerFacade {
             throw new Exception("response exception");
         }
     }
+
+    private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws ResponseException {
+        var status = response.statusCode();
+        if(!isSuccessful(status)){
+            var body = response.body();
+            if(body != null){
+                throw ResponseException.fromJson(body);
+            }
+
+            throw new ResponseException(ResponseException.fromHttpStatusCode(status), "other failure: " + status);
+        }
+
+        if(responseClass != null){
+            return new Gson().fromJson(response.body(), responseClass);
+        }
+
+        return null;
+    }
+
+    private boolean isSuccessful(int status){ return status / 100 == 2; }
 }
