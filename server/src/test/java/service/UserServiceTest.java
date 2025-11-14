@@ -2,10 +2,7 @@ package service;
 
 import dataaccess.DataAccess;
 import dataaccess.MemoryDataAccess;
-import datamodel.CreateRequest;
-import datamodel.JoinData;
-import datamodel.LoginData;
-import datamodel.UserData;
+import datamodel.*;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -124,13 +121,13 @@ class UserServiceTest {
         var user = new UserData("henry", "henryshenry@henry.org", "HEN123");
         var authData = service.register(user);
         var gameID = service.createGame(new CreateRequest(authData.authToken(), "Game1"));
-        service.joinGame(authData.authToken(), new JoinData("WHITE", gameID));
+        service.joinGame(new JoinRequest(authData.authToken(), new JoinData("WHITE", gameID)));
         assertNotNull(db.getGame(gameID).whiteUsername());
         assertNull(db.getGame(gameID).blackUsername());
 
         var user3 = new UserData("henrychen", "henrychenshenry@henry.org", "HEN123");
         var authData3 = service.register(user3);
-        service.joinGame(authData3.authToken(), new JoinData("BLACK", gameID));
+        service.joinGame(new JoinRequest(authData3.authToken(), new JoinData("BLACK", gameID)));
         assertNotNull(db.getGame(gameID).blackUsername());
     }
 
@@ -141,12 +138,12 @@ class UserServiceTest {
         var user = new UserData("henry", "henryshenry@henry.org", "HEN123");
         var authData = service.register(user);
         var gameID = service.createGame(new CreateRequest(authData.authToken(), "Game1"));
-        service.joinGame(authData.authToken(), new JoinData("WHITE", gameID));
+        service.joinGame(new JoinRequest(authData.authToken(), new JoinData("WHITE", gameID)));
 
         var user2 = new UserData("henrietta", "henriettashenry@henry.org", "HEN123");
         var authData2 = service.register(user2);
         assertThrows(AlreadyTakenException.class,
-                () -> service.joinGame(authData2.authToken(), new JoinData("WHITE", gameID))
+                () -> service.joinGame(new JoinRequest(authData2.authToken(), new JoinData("WHITE", gameID)))
         );
     }
 
