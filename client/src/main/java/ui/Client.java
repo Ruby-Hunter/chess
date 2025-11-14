@@ -1,9 +1,7 @@
 package ui;
 
 import chess.ChessGame;
-import datamodel.AuthData;
-import datamodel.LoginData;
-import datamodel.UserData;
+import datamodel.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +24,7 @@ public class Client {
     public Client(){
         state = game_state.INIT;
         res = "";
-        url = "localhost";
+        url = "http://localhost:299";
         scanner = new Scanner(System.in);
         facade = new ServerFacade(url);
     }
@@ -34,6 +32,34 @@ public class Client {
     public void loop(){
         while(!res.equals("quit")){
             tick();
+        }
+    }
+
+    public void tick() {
+        switch(state){
+            case INIT:
+                System.out.println("Welcome to chess! Type \"Help\" to list commands.");
+                state = game_state.LOGGED_OUT;
+                logout_help();
+            case LOGGED_OUT:
+                System.out.print("\n[LOGGED OUT: Not playing] >>> ");
+                System.out.println(logged_out_eval(scanner.nextLine()));
+                break;
+            case LOGGED_IN:
+                System.out.print("\n[LOGGED IN: Not playing] >>> ");
+                System.out.println(logged_in_eval(scanner.nextLine()));
+                break;
+            case PLAYING:
+                System.out.printf("\n[PLAYING: %s] >>> ", color);
+                System.out.println(playing_eval(scanner.nextLine()));
+                break;
+            case OBSERVING:
+                System.out.print("\n[OBSERVING] >>> ");
+                print_board_white();
+                System.out.println(observing_eval(scanner.nextLine()));
+                break;
+            default:
+                throw new IllegalStateException("No client state error");
         }
     }
 
@@ -84,16 +110,19 @@ public class Client {
                 case "c", "create" -> "create";
                 case "li", "list" -> "list";
                 case "j", "join" -> {
+//                    facade.joinGame(new JoinRequest(auth.authToken(), new JoinData(params[1], Integer.parseInt(params[0]))));
                     state = game_state.PLAYING;
                     playing_help();
                     yield "join";
                 }
                 case "o", "observe" -> {
+//                    facade.listGames(auth.authToken()).
                     state = game_state.OBSERVING;
                     playing_help();
                     yield "observe";
                 }
                 case "lo", "logout" -> {
+                    facade.logout(auth.authToken());
                     state = game_state.LOGGED_OUT;
                     logout_help();
                     yield "logout";
@@ -123,7 +152,9 @@ public class Client {
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "m", "move" -> "move";
+                case "m", "move" -> {
+                    yield "move";
+                }
                 case "s", "show" -> {
                     if(color == null || color == ChessGame.TeamColor.WHITE){
                         print_board_white();
@@ -177,34 +208,6 @@ public class Client {
         } catch (Exception ex){
             System.err.print("observing_eval error");
             return ex.getMessage();
-        }
-    }
-
-    public void tick() {
-        switch(state){
-            case INIT:
-                System.out.println("Welcome to chess! Type \"Help\" to list commands.");
-                state = game_state.LOGGED_OUT;
-                logout_help();
-            case LOGGED_OUT:
-                System.out.print("\n[LOGGED OUT: Not playing] >>> ");
-                System.out.println(logged_out_eval(scanner.nextLine()));
-                break;
-            case LOGGED_IN:
-                System.out.print("\n[LOGGED IN: Not playing] >>> ");
-                System.out.println(logged_in_eval(scanner.nextLine()));
-                break;
-            case PLAYING:
-                System.out.printf("\n[PLAYING: %s] >>> ", color);
-                System.out.println(playing_eval(scanner.nextLine()));
-                break;
-            case OBSERVING:
-                System.out.print("\n[OBSERVING] >>> ");
-                print_board_white();
-                System.out.println(observing_eval(scanner.nextLine()));
-                break;
-            default:
-                throw new IllegalStateException("No client state error");
         }
     }
 
