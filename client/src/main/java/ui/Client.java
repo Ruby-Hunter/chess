@@ -202,6 +202,10 @@ public class Client {
         }
     }
 
+    // Underline: [;;4m
+    // None: [;;0m
+    // Orange: [33;49;1m
+    // Blue: [34;49;1m
     private void logout_help(){
         System.out.println(" \u001b[;;4mCommands:\u001b[;;0m");
         System.out.println("  \u001b[33;49;1m\"r\"/\"register\" <USERNAME> <PASSWORD> <EMAIL> \u001b[34;49;1m- to create an account");
