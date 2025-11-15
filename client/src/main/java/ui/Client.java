@@ -71,6 +71,9 @@ public class Client {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "r", "register" -> {
+                    if(params.length < 3){
+                        yield "Usage: register <USERNAME> <PASSWORD> <EMAIL>";
+                    }
                     auth = facade.register(new UserData(params[0], params[1], params[2]));
                     state = game_state.LOGGED_IN;
                     login_help();

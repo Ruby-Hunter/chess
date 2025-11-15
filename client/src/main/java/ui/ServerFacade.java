@@ -63,10 +63,12 @@ public class ServerFacade {
 
     private HttpRequest buildRequest(String method, String path, Object body, String authToken){
         var request = HttpRequest.newBuilder()
-                .uri(URI.create(serverURL + path))
-                .method(method, makeRequestBody(body));
+                .uri(URI.create(serverURL + path));
         if(body != null){
             request.setHeader("Content-Type", "application/json");
+            request.method(method, makeRequestBody(body));
+        }else{
+            request.method(method, BodyPublishers.noBody());
         }
         if(authToken != null){
             request.setHeader("authorization", authToken);
@@ -102,7 +104,12 @@ public class ServerFacade {
         }
 
         if(responseClass != null){
-            return new Gson().fromJson(response.body(), responseClass);
+            try{
+                return new Gson().fromJson(response.body(), responseClass);
+            } catch (Exception ex){
+                throw new ResponseException(ResponseException.Code.ServerError,
+                        "Invalid server response" + response.body());
+            }
         }
 
         return null;
