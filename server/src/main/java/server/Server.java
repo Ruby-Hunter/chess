@@ -2,6 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.SqlDataAccess;
+import datamodel.*;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import exception.AlreadyTakenException;
