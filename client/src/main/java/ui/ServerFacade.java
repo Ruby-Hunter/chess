@@ -98,12 +98,21 @@ public class ServerFacade {
             if(status == 403){
                 System.err.println("Username already taken");
             }
+            if(status == 401){
+                System.err.println("User does not exist");
+            }
+            if(status == 400){
+                System.err.println("Bad request, need fields");
+            }
+            if(status == 500){
+                System.err.println("Unknown error");
+            }
             var body = response.body();
             if(body != null){
-                throw new ResponseException(ResponseException.fromHttpStatusCode(status), response.body());
+                throw new ResponseException(ResponseException.fromHttpStatusCode(status), "");
             }
 
-            throw new ResponseException(ResponseException.fromHttpStatusCode(status), "other failure: " + status);
+            throw new ResponseException(ResponseException.fromHttpStatusCode(status), "");
         }
 
         if(responseClass != null){

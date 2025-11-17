@@ -77,7 +77,8 @@ public class UserService {
 
     public void joinGame(JoinRequest request) throws Exception {
         if(request.authToken() == null  ||  request.joinData().gameID() == null  ||  request.joinData().playerColor() == null
-                ||  !(request.joinData().playerColor().equals("WHITE")  ||  request.joinData().playerColor().equals("BLACK")) ){
+                ||  !(request.joinData().playerColor().toUpperCase().equals("WHITE")  ||
+                      request.joinData().playerColor().toUpperCase().equals("BLACK")) ){
             throw new BadRequestException("bad request");
         }
         var auth = dataAccess.getAuth(request.authToken());
@@ -89,7 +90,7 @@ public class UserService {
             throw new BadRequestException("bad request");
         }
         GameData newGame;
-        if(request.joinData().playerColor().equals("WHITE")){
+        if(request.joinData().playerColor().toUpperCase().equals("WHITE")){
             if(gameData.whiteUsername() != null){
                 throw new AlreadyTakenException("already taken");
             } else{

@@ -105,13 +105,13 @@ public class Client {
             };
         } catch (AlreadyTakenException ex){
             System.err.print("Username already taken");
-            return ex.getMessage();
+            return null;
         } catch (BadRequestException ex){
             System.err.print("Fields not all complete");
-            return ex.getMessage();
+            return null;
         } catch (Exception ex){
-            System.err.print("logged_out_eval error");
-            return ex.getMessage();
+//            System.err.print("logged_out_eval error");
+            return "";
         }
     }
 
@@ -136,12 +136,23 @@ public class Client {
                     }
                     else {
                         for(GameData game : gameList.games()){
-                            System.out.println(game.gameID());
+                            System.out.printf("%d %s WhitePlayer: %s | BlackPlayer: %s\n",
+                                    game.gameID(), game.gameName(), game.whiteUsername(), game.blackUsername());
                         }
                     }
                     yield "list";
                 }
                 case "j", "join" -> {
+                    if(params.length != 2){
+                        yield "Usage: join <ID> [WHITE|BLACK]";
+                    }
+                    if(params[1].toUpperCase().equals("WHITE")){
+                        color = ChessGame.TeamColor.WHITE;
+                    } else if(params[1].toUpperCase().equals("BLACK")){
+                        color = ChessGame.TeamColor.BLACK;
+                    } else{
+                        yield "Usage: join <ID> [WHITE|BLACK]";
+                    }
                     facade.joinGame(new JoinRequest(auth.authToken(), new JoinData(params[1], Integer.parseInt(params[0]))));
                     state = game_state.PLAYING;
                     playing_help();
@@ -173,8 +184,8 @@ public class Client {
                 }
             };
         } catch (Exception ex){
-            System.err.print("logged_out_eval error");
-            return ex.getMessage();
+//            System.err.print("logged_in_eval error");
+            return "";
         }
     }
 
@@ -195,6 +206,11 @@ public class Client {
                     }
                     yield "show";
                 }
+                case "l", "leave" -> {
+                    color = null;
+                    state = game_state.LOGGED_IN;
+                    yield "leave";
+                }
                 case "q", "quit" -> {
                     res = "quit";
                     yield "quit";
@@ -209,8 +225,8 @@ public class Client {
                 }
             };
         } catch (Exception ex){
-            System.err.print("playing_eval error");
-            return ex.getMessage();
+//            System.err.print("playing_eval error");
+            return "";
         }
     }
 
@@ -238,8 +254,8 @@ public class Client {
                 }
             };
         } catch (Exception ex){
-            System.err.print("observing_eval error");
-            return ex.getMessage();
+//            System.err.print("observing_eval error");
+            return "";
         }
     }
 
@@ -270,6 +286,7 @@ public class Client {
         System.out.println(" \u001b[;;4mCommands:\u001b[;;0m");
         System.out.println("  \u001b[33;49;1m\"m\"/\"move\" <POS1> <POS2> \u001b[34;49;1m- a piece");
         System.out.println("  \u001b[33;49;1m\"s\"/\"show\" \u001b[34;49;1m- the board");
+        System.out.println("  \u001b[33;49;1m\"l\"/\"leave\" \u001b[34;49;1m- the game");
         System.out.println("  \u001b[33;49;1m\"q\"/\"quit\" \u001b[34;49;1m- playing chess");
         System.out.println("  \u001b[33;49;1m\"h\"/\"help\" \u001b[34;49;1m- with possible commands\u001b[;;0m");
     }
