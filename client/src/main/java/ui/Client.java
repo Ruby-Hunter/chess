@@ -4,6 +4,8 @@ import chess.ChessGame;
 import datamodel.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import service.AlreadyTakenException;
+import service.BadRequestException;
 
 import java.util.Arrays;
 import java.util.Scanner;
@@ -80,6 +82,9 @@ public class Client {
                     yield "register";
                 }
                 case "l", "login" -> {
+                    if(params.length < 2){
+                        yield "Usage: login <USERNAME> <PASSWORD>";
+                    }
                     auth = facade.login(new LoginData(params[0], params[1]));
                     state = game_state.LOGGED_IN;
                     login_help();
@@ -98,6 +103,12 @@ public class Client {
                     yield "bad command";
                 }
             };
+        } catch (AlreadyTakenException ex){
+            System.err.print("Username already taken");
+            return ex.getMessage();
+        } catch (BadRequestException ex){
+            System.err.print("Fields not all complete");
+            return ex.getMessage();
         } catch (Exception ex){
             System.err.print("logged_out_eval error");
             return ex.getMessage();
@@ -110,7 +121,14 @@ public class Client {
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
-                case "c", "create" -> "create";
+                case "c", "create" -> {
+                    if(params.length != 1){
+                        yield "Usage: create <NAME>";
+                    }
+                    int gameID = facade.createGame(auth.authToken(), params[0]);
+                    System.out.printf("GameID: %d\n", gameID);
+                    yield "create";
+                }
                 case "li", "list" -> {
                     ListGamesResponse gameList = facade.listGames(auth.authToken());
                     if(gameList.games().isEmpty()){
@@ -124,13 +142,13 @@ public class Client {
                     yield "list";
                 }
                 case "j", "join" -> {
-//                    facade.joinGame(new JoinRequest(auth.authToken(), new JoinData(params[1], Integer.parseInt(params[0]))));
+                    facade.joinGame(new JoinRequest(auth.authToken(), new JoinData(params[1], Integer.parseInt(params[0]))));
                     state = game_state.PLAYING;
                     playing_help();
                     yield "join";
                 }
                 case "o", "observe" -> {
-//                    facade.listGames(auth.authToken());
+                    facade.listGames(auth.authToken());
                     state = game_state.OBSERVING;
                     playing_help();
                     yield "observe";

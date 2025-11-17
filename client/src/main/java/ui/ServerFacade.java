@@ -40,7 +40,8 @@ public class ServerFacade {
     public Integer createGame(String authToken, String gameName) throws ResponseException {
         var request = buildRequest("POST", "/game", new CreateRequest(gameName), authToken);
         var response = sendRequest(request);
-        return handleResponse(response, Integer.class);
+        CreateGameResponse resp = handleResponse(response, CreateGameResponse.class);
+        return resp.gameID();
     }
 
     public ListGamesResponse listGames(String authToken) throws ResponseException {
@@ -95,6 +96,9 @@ public class ServerFacade {
     private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws ResponseException {
         var status = response.statusCode();
         if(!isSuccessful(status)){
+            if(status == 403){
+                System.err.println("Username already taken");
+            }
             var body = response.body();
             if(body != null){
                 throw new ResponseException(ResponseException.fromHttpStatusCode(status), response.body());
