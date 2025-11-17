@@ -1,5 +1,7 @@
 package dataaccess;
 
+import datamodel.*;
+
 import java.util.HashSet;
 
 public interface DataAccess {

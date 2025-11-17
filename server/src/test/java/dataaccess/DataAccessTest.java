@@ -1,7 +1,7 @@
 package dataaccess;
 
 import org.junit.jupiter.api.Test;
-
+import datamodel.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DataAccessTest {

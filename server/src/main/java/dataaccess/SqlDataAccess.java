@@ -3,6 +3,7 @@ package dataaccess;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import org.mindrot.jbcrypt.BCrypt;
+import datamodel.*;
 
 import java.sql.SQLException;
 import java.sql.Types;
