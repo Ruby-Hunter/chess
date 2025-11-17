@@ -4,8 +4,8 @@ import chess.ChessGame;
 import datamodel.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import service.AlreadyTakenException;
-import service.BadRequestException;
+import exception.AlreadyTakenException;
+import exception.BadRequestException;
 
 import java.util.Arrays;
 import java.util.Scanner;

@@ -2,12 +2,11 @@ package server;
 
 import com.google.gson.Gson;
 import dataaccess.SqlDataAccess;
-import datamodel.*;
 import io.javalin.Javalin;
 import io.javalin.http.Context;
-import service.AlreadyTakenException;
-import service.BadRequestException;
-import service.UnauthorizedException;
+import exception.AlreadyTakenException;
+import exception.BadRequestException;
+import exception.UnauthorizedException;
 import service.UserService;
 
 import java.util.Map;

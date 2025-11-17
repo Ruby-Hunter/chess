@@ -2,7 +2,7 @@ package ui;
 
 import com.google.gson.Gson;
 import datamodel.*;
-import exception.ResponseException;
+import exception.*;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -11,7 +11,6 @@ import java.net.http.HttpRequest.BodyPublisher;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
-import java.util.HashSet;
 
 public class ServerFacade {
     private final HttpClient client = HttpClient.newHttpClient();

@@ -1,10 +1,6 @@
 package dataaccess;
 
-import com.mysql.cj.log.Log;
-import datamodel.*;
-
 import java.util.HashSet;
-import java.util.Set;
 
 public interface DataAccess {
     void clear() throws Exception;
