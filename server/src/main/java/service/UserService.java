@@ -58,16 +58,16 @@ public class UserService {
         return dataAccess.listGames();
     }
 
-    public Integer createGame(CreateRequest request) throws Exception {
-        if(request.authToken() == null  ||  request.gameName() == null){
+    public Integer createGame(String authToken, String gameName) throws Exception {
+        if(authToken == null  ||  gameName == null){
             throw new BadRequestException("bad request");
         }
-        var auth = dataAccess.getAuth(request.authToken());
+        var auth = dataAccess.getAuth(authToken);
         if(auth == null){ // check if auth exists
             throw new UnauthorizedException("unauthorized");
         }
         int gameID = generateID();
-        var game = new GameData(gameID, null, null, request.gameName(), new ChessGame());
+        var game = new GameData(gameID, null, null, gameName, new ChessGame());
         dataAccess.createGame(game);
         return gameID;
     }

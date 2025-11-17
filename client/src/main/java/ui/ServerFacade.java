@@ -37,16 +37,16 @@ public class ServerFacade {
         handleResponse(response, null);
     }
 
-    public Integer createGame(CreateRequest createRequest) throws ResponseException {
-        var request = buildRequest("POST", "/game", createRequest.gameName(), createRequest.authToken());
+    public Integer createGame(String authToken, String gameName) throws ResponseException {
+        var request = buildRequest("POST", "/game", new CreateRequest(gameName), authToken);
         var response = sendRequest(request);
         return handleResponse(response, Integer.class);
     }
 
-    public HashSet listGames(String authToken) throws ResponseException {
+    public ListGamesResponse listGames(String authToken) throws ResponseException {
         var request = buildRequest("GET", "/game", null, authToken);
         var response = sendRequest(request);
-        return handleResponse(response, HashSet.class);
+        return handleResponse(response, ListGamesResponse.class);
     }
 
     public void joinGame(JoinRequest joinRequest) throws ResponseException {
@@ -97,7 +97,7 @@ public class ServerFacade {
         if(!isSuccessful(status)){
             var body = response.body();
             if(body != null){
-                throw ResponseException.fromJson(body);
+                throw new ResponseException(ResponseException.fromHttpStatusCode(status), response.body());
             }
 
             throw new ResponseException(ResponseException.fromHttpStatusCode(status), "other failure: " + status);

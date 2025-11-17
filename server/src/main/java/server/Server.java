@@ -110,7 +110,7 @@ public class Server {
             String reqJsonBody = ctx.body();
             Map gameMap = serializer.fromJson(reqJsonBody, Map.class);
             String gameName = (String)gameMap.get("gameName");
-            int gameID = userServ.createGame(new CreateRequest(auth, gameName));
+            int gameID = userServ.createGame(auth, gameName);
             var createGameResult = Map.of("gameID", gameID);
             ctx.result(serializer.toJson(createGameResult));
         } catch (BadRequestException ex){

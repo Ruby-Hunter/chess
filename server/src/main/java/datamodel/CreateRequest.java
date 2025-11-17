@@ -1,4 +1,4 @@
 package datamodel;
 
-public record CreateRequest(String authToken, String gameName) {
+public record CreateRequest(String gameName) {
 }

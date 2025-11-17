@@ -72,7 +72,7 @@ public class Client {
             return switch (cmd) {
                 case "r", "register" -> {
                     if(params.length < 3){
-                        yield "Usage: register <USERNAME> <PASSWORD> <EMAIL>";
+                        yield "Usage: register <USERNAME> <EMAIL> <PASSWORD>";
                     }
                     auth = facade.register(new UserData(params[0], params[1], params[2]));
                     state = game_state.LOGGED_IN;
@@ -111,7 +111,18 @@ public class Client {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "c", "create" -> "create";
-                case "li", "list" -> "list";
+                case "li", "list" -> {
+                    ListGamesResponse gameList = facade.listGames(auth.authToken());
+                    if(gameList.games().isEmpty()){
+                        System.out.println("No games");
+                    }
+                    else {
+                        for(GameData game : gameList.games()){
+                            System.out.println(game.gameID());
+                        }
+                    }
+                    yield "list";
+                }
                 case "j", "join" -> {
 //                    facade.joinGame(new JoinRequest(auth.authToken(), new JoinData(params[1], Integer.parseInt(params[0]))));
                     state = game_state.PLAYING;
@@ -119,7 +130,7 @@ public class Client {
                     yield "join";
                 }
                 case "o", "observe" -> {
-//                    facade.listGames(auth.authToken()).
+//                    facade.listGames(auth.authToken());
                     state = game_state.OBSERVING;
                     playing_help();
                     yield "observe";
@@ -220,7 +231,7 @@ public class Client {
     // Blue: [34;49;1m
     private void logout_help(){
         System.out.println(" \u001b[;;4mCommands:\u001b[;;0m");
-        System.out.println("  \u001b[33;49;1m\"r\"/\"register\" <USERNAME> <PASSWORD> <EMAIL> \u001b[34;49;1m- to create an account");
+        System.out.println("  \u001b[33;49;1m\"r\"/\"register\" <USERNAME> <EMAIL> <PASSWORD> \u001b[34;49;1m- to create an account");
         System.out.println("  \u001b[33;49;1m\"l\"/\"login\" <USERNAME> <PASSWORD> \u001b[34;49;1m- to play chess");
         System.out.println("  \u001b[33;49;1m\"q\"/\"quit\" \u001b[34;49;1m- playing chess");
         System.out.println("  \u001b[33;49;1m\"h\"/\"help\" \u001b[34;49;1m- with possible commands\u001b[;;0m");
