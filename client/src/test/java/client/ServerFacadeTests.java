@@ -4,10 +4,7 @@ import datamodel.*;
 import exception.*;
 import org.junit.jupiter.api.*;
 import server.Server;
-import ui.Client;
 import ui.ServerFacade;
-
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
