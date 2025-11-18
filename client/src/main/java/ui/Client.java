@@ -11,11 +11,11 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 public class Client {
-    public enum game_state {
+    public enum gameState {
         INIT, LOGGED_OUT, LOGGED_IN, PLAYING, OBSERVING
     }
 
-    private game_state state;
+    private gameState state;
     private ChessGame.TeamColor color;
     private String res;
     private final Scanner scanner;
@@ -24,7 +24,7 @@ public class Client {
     AuthData auth;
 
     public Client(String port){
-        state = game_state.INIT;
+        state = gameState.INIT;
         res = "";
         url = "http://localhost:" + port;
         scanner = new Scanner(System.in);
@@ -42,24 +42,24 @@ public class Client {
         switch(state){
             case INIT:
                 System.out.println("Welcome to chess! Type \"Help\" to list commands.");
-                state = game_state.LOGGED_OUT;
-                logout_help();
+                state = gameState.LOGGED_OUT;
+                logoutHelp();
             case LOGGED_OUT:
                 System.out.print("\n[LOGGED OUT: Not playing] >>> ");
-                System.out.println(logged_out_eval(scanner.nextLine()));
+                System.out.println(loggedOutEval(scanner.nextLine()));
                 break;
             case LOGGED_IN:
                 System.out.print("\n[LOGGED IN: Not playing] >>> ");
-                System.out.println(logged_in_eval(scanner.nextLine()));
+                System.out.println(loggedInEval(scanner.nextLine()));
                 break;
             case PLAYING:
                 System.out.printf("\n[PLAYING: %s] >>> ", color);
-                System.out.println(playing_eval(scanner.nextLine()));
+                System.out.println(playingEval(scanner.nextLine()));
                 break;
             case OBSERVING:
                 System.out.print("\n[OBSERVING] >>> ");
 //                print_board_white();
-                System.out.println(observing_eval(scanner.nextLine()));
+                System.out.println(observingEval(scanner.nextLine()));
                 break;
             default:
                 throw new IllegalStateException("No client state error");
@@ -70,7 +70,7 @@ public class Client {
     --------Eval Functions--------
      */
     // Reads the input and acts based on it when logged out
-    private String logged_out_eval(String line){
+    private String loggedOutEval(String line){
         try{
             String[] tokens = line.toLowerCase().split(" ");
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
@@ -81,8 +81,8 @@ public class Client {
                         yield "Usage: register <USERNAME> <EMAIL> <PASSWORD>";
                     }
                     auth = facade.register(new UserData(params[0], params[1], params[2]));
-                    state = game_state.LOGGED_IN;
-                    login_help();
+                    state = gameState.LOGGED_IN;
+                    loginHelp();
                     yield "\nRegistered";
                 }
                 case "l", "login" -> {
@@ -90,8 +90,8 @@ public class Client {
                         yield "Usage: login <USERNAME> <PASSWORD>";
                     }
                     auth = facade.login(new LoginData(params[0], params[1]));
-                    state = game_state.LOGGED_IN;
-                    login_help();
+                    state = gameState.LOGGED_IN;
+                    loginHelp();
                     yield "\nLogged in";
                 }
                 case "q", "quit" -> {
@@ -99,11 +99,11 @@ public class Client {
                     yield "Bye!";
                 }
                 case "h", "help" -> {
-                    logout_help();
+                    logoutHelp();
                     yield "";
                 }
                 default -> {
-                    logout_help();
+                    logoutHelp();
                     yield "\nBad Command";
                 }
             };
@@ -118,7 +118,7 @@ public class Client {
         }
     }
 
-    private String logged_in_eval(String line){
+    private String loggedInEval(String line){
         try{
             String[] tokens = line.toLowerCase().split(" ");
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
@@ -157,20 +157,20 @@ public class Client {
                         yield "Usage: join <ID> [WHITE|BLACK]";
                     }
                     facade.joinGame(new JoinRequest(auth.authToken(), new JoinData(params[1].toUpperCase(), Integer.parseInt(params[0]))));
-                    state = game_state.PLAYING;
-                    playing_help();
+                    state = gameState.PLAYING;
+                    playingHelp();
                     yield "\nJoined game " + params[0];
                 }
                 case "o", "observe" -> {
                     facade.listGames(auth.authToken());
-                    state = game_state.OBSERVING;
-                    observing_help();
+                    state = gameState.OBSERVING;
+                    observingHelp();
                     yield "\nObserving";
                 }
                 case "lo", "logout" -> {
                     facade.logout(auth.authToken());
-                    state = game_state.LOGGED_OUT;
-                    logout_help();
+                    state = gameState.LOGGED_OUT;
+                    logoutHelp();
                     yield "\nLogged out";
                 }
                 case "q", "quit" -> {
@@ -178,17 +178,17 @@ public class Client {
                     yield "Bye!";
                 }
                 case "h", "help" -> {
-                    login_help();
+                    loginHelp();
                     yield "\nHelp";
                 }
                 case "clear" -> {
                     facade.clear();
-                    logout_help();
-                    state = game_state.LOGGED_OUT;
+                    logoutHelp();
+                    state = gameState.LOGGED_OUT;
                     yield "\nDatabase Cleared, logged out";
                 }
                 default -> {
-                    login_help();
+                    loginHelp();
                     yield "\nBad command";
                 }
             };
@@ -203,7 +203,7 @@ public class Client {
         }
     }
 
-    private String playing_eval(String line){
+    private String playingEval(String line){
         try{
             String[] tokens = line.toLowerCase().split(" ");
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
@@ -214,15 +214,15 @@ public class Client {
                 }
                 case "s", "show" -> {
                     if(color == null || color == ChessGame.TeamColor.WHITE){
-                        print_board_white();
+                        printBoardWhite();
                     } else{
-                        print_board_black();
+                        printBoardBlack();
                     }
                     yield "show";
                 }
                 case "l", "leave" -> {
                     color = null;
-                    state = game_state.LOGGED_IN;
+                    state = gameState.LOGGED_IN;
                     yield "leave";
                 }
                 case "q", "quit" -> {
@@ -230,11 +230,11 @@ public class Client {
                     yield "quit";
                 }
                 case "h", "help" -> {
-                    playing_help();
+                    playingHelp();
                     yield "help";
                 }
                 default -> {
-                    playing_help();
+                    playingHelp();
                     yield "bad command";
                 }
             };
@@ -243,14 +243,14 @@ public class Client {
         }
     }
 
-    private String observing_eval(String line){
+    private String observingEval(String line){
         try{
             String[] tokens = line.toLowerCase().split(" ");
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "s", "show" -> {
-                    print_board_white();
+                    printBoardWhite();
                     yield "show";
                 }
                 case "q", "quit" -> {
@@ -258,15 +258,15 @@ public class Client {
                     yield "quit";
                 }
                 case "h", "help" -> {
-                    observing_help();
+                    observingHelp();
                     yield "help";
                 }
                 case "l", "leave" -> {
-                    state = game_state.LOGGED_IN;
+                    state = gameState.LOGGED_IN;
                     yield "leave";
                 }
                 default -> {
-                    observing_help();
+                    observingHelp();
                     yield "bad command";
                 }
             };
@@ -282,7 +282,7 @@ public class Client {
     // None: [;;0m
     // Orange: [33;49;1m
     // Blue: [34;49;1m
-    private void logout_help(){
+    private void logoutHelp(){
         System.out.println(" \u001b[;;4mCommands:\u001b[;;0m");
         System.out.println("  \u001b[33;49;1m\"r\"/\"register\" <USERNAME> <EMAIL> <PASSWORD> \u001b[34;49;1m- to create an account");
         System.out.println("  \u001b[33;49;1m\"l\"/\"login\" <USERNAME> <PASSWORD> \u001b[34;49;1m- to play chess");
@@ -290,7 +290,7 @@ public class Client {
         System.out.println("  \u001b[33;49;1m\"h\"/\"help\" \u001b[34;49;1m- with possible commands\u001b[;;0m");
     }
 
-    private void login_help(){
+    private void loginHelp(){
         System.out.println(" \u001b[;;4mCommands:\u001b[;;0m");
         System.out.println("  \u001b[33;49;1m\"c\"/\"create\" <NAME> \u001b[34;49;1m- a game");
         System.out.println("  \u001b[33;49;1m\"li\"/\"list\" \u001b[34;49;1m- games");
@@ -302,7 +302,7 @@ public class Client {
         System.out.println("  \u001b[33;49;1m\"h\"/\"help\" \u001b[34;49;1m- with possible commands\u001b[;;0m");
     }
 
-    private void playing_help(){
+    private void playingHelp(){
         System.out.println(" \u001b[;;4mCommands:\u001b[;;0m");
         System.out.println("  \u001b[33;49;1m\"m\"/\"move\" <POS1> <POS2> \u001b[34;49;1m- a piece");
         System.out.println("  \u001b[33;49;1m\"s\"/\"show\" \u001b[34;49;1m- the board");
@@ -311,7 +311,7 @@ public class Client {
         System.out.println("  \u001b[33;49;1m\"h\"/\"help\" \u001b[34;49;1m- with possible commands\u001b[;;0m");
     }
 
-    private void observing_help(){
+    private void observingHelp(){
         System.out.println(" \u001b[;;4mCommands:\u001b[;;0m");
         System.out.println("  \u001b[33;49;1m\"s\"/\"show\" \u001b[34;49;1m- the board");
         System.out.println("  \u001b[33;49;1m\"l\"/\"leave\" \u001b[34;49;1m- the game");
@@ -329,7 +329,7 @@ public class Client {
     // White on Black: [34;40;1m
     // Black on White: [31;107;1m
     // Black on Black: [31;40;1m
-    private void print_board_white(){
+    private void printBoardWhite(){
         System.out.println("\u001b[30;100;1m    a  b  c  d  e  f  g  h    \u001b[;;0m");
         System.out.println("\u001b[30;100;1m 8 \u001b[34;107;1m R \u001b[34;40;1m N \u001b[34;107;1m B " + //Black
                 "\u001b[34;40;1m Q \u001b[34;107;1m K \u001b[34;40;1m B \u001b[34;107;1m N " +
@@ -356,7 +356,7 @@ public class Client {
         System.out.println("\u001b[30;100;1m    a  b  c  d  e  f  g  h    \u001b[;;0m\n");
     }
 
-    private void print_board_black(){
+    private void printBoardBlack(){
         System.out.println("\u001b[30;100;1m    h  g  f  e  d  c  b  a    \u001b[;;0m");
         System.out.println("\u001b[30;100;1m 1 \u001b[31;107;1m R \u001b[31;40;1m N \u001b[31;107;1m B " + //White
                 "\u001b[31;40;1m K \u001b[31;107;1m Q \u001b[31;40;1m B \u001b[31;107;1m N " +
@@ -384,9 +384,9 @@ public class Client {
     }
 
     @Test
-    void print_board_test(){
-        print_board_white();
-        print_board_black();
+    void printBoardTest(){
+        printBoardWhite();
+        printBoardBlack();
         Assertions.assertTrue(true);
     }
 }
