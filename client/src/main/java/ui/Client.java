@@ -137,11 +137,9 @@ public class Client {
                     if(gameList.games().isEmpty()){
                         yield "\nNo games";
                     }
-                    else {
-                        for(GameData game : gameList.games()){
-                            System.out.printf("%d %s WhitePlayer: %s | BlackPlayer: %s\n",
-                                    game.gameID(), game.gameName(), game.whiteUsername(), game.blackUsername());
-                        }
+                    for(GameData game : gameList.games()){
+                        System.out.printf("%d %s WhitePlayer: %s | BlackPlayer: %s\n",
+                                game.gameID(), game.gameName(), game.whiteUsername(), game.blackUsername());
                     }
                     yield "";
                 }
