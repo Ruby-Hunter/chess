@@ -5,8 +5,7 @@ import datamodel.*;
 import exception.UnauthorizedException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import exception.AlreadyTakenException;
-import exception.BadRequestException;
+import exception.*;
 
 import java.util.Arrays;
 import java.util.Scanner;
@@ -32,6 +31,7 @@ public class Client {
         facade = new ServerFacade(url);
     }
 
+    // Loops the tick function
     public void loop(){
         while(!res.equals("quit")){
             tick();
@@ -66,6 +66,9 @@ public class Client {
         }
     }
 
+    /*
+    --------Eval Functions--------
+     */
     // Reads the input and acts based on it when logged out
     private String logged_out_eval(String line){
         try{
@@ -230,8 +233,7 @@ public class Client {
                 }
             };
         } catch (Exception ex){
-//            System.err.print("playing_eval error");
-            return "";
+            return "playing_eval error";
         }
     }
 
@@ -263,11 +265,13 @@ public class Client {
                 }
             };
         } catch (Exception ex){
-//            System.err.print("observing_eval error");
-            return "";
+            return "observing_eval error";
         }
     }
 
+    /*
+    --------Prints--------
+    */
     // Underline: [;;4m
     // None: [;;0m
     // Orange: [33;49;1m
@@ -308,6 +312,9 @@ public class Client {
         System.out.println("  \u001b[33;49;1m\"h\"/\"help\" \u001b[34;49;1m- with possible commands\u001b[;;0m");
     }
 
+    /*
+    --------Board Prints--------
+     */
     // Sides: [30;100;1m
     // Blank White: [;107;1m
     // Blank Black: [;40;1m
