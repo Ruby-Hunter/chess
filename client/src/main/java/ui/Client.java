@@ -23,10 +23,10 @@ public class Client {
     ServerFacade facade;
     AuthData auth;
 
-    public Client(){
+    public Client(String port){
         state = game_state.INIT;
         res = "";
-        url = "http://localhost:299";
+        url = "http://localhost:" + port;
         scanner = new Scanner(System.in);
         facade = new ServerFacade(url);
     }
@@ -83,7 +83,7 @@ public class Client {
                     auth = facade.register(new UserData(params[0], params[1], params[2]));
                     state = game_state.LOGGED_IN;
                     login_help();
-                    yield "register";
+                    yield "\nRegistered";
                 }
                 case "l", "login" -> {
                     if(params.length < 2){
@@ -92,19 +92,19 @@ public class Client {
                     auth = facade.login(new LoginData(params[0], params[1]));
                     state = game_state.LOGGED_IN;
                     login_help();
-                    yield "login";
+                    yield "\nLogged in";
                 }
                 case "q", "quit" -> {
                     res = "quit";
-                    yield "quit";
+                    yield "Bye!";
                 }
                 case "h", "help" -> {
                     logout_help();
-                    yield "help";
+                    yield "";
                 }
                 default -> {
                     logout_help();
-                    yield "bad command";
+                    yield "\nBad Command";
                 }
             };
         } catch (BadRequestException ex){
@@ -130,12 +130,12 @@ public class Client {
                     }
                     int gameID = facade.createGame(auth.authToken(), params[0]);
                     System.out.printf("GameID: %d\n", gameID);
-                    yield "create";
+                    yield "\nGame created";
                 }
                 case "li", "list" -> {
                     ListGamesResponse gameList = facade.listGames(auth.authToken());
                     if(gameList.games().isEmpty()){
-                        System.out.println("No games");
+                        yield "\nNo games";
                     }
                     else {
                         for(GameData game : gameList.games()){
@@ -143,7 +143,7 @@ public class Client {
                                     game.gameID(), game.gameName(), game.whiteUsername(), game.blackUsername());
                         }
                     }
-                    yield "list";
+                    yield "";
                 }
                 case "j", "join" -> {
                     if(params.length != 2){
@@ -159,31 +159,37 @@ public class Client {
                     facade.joinGame(new JoinRequest(auth.authToken(), new JoinData(params[1].toUpperCase(), Integer.parseInt(params[0]))));
                     state = game_state.PLAYING;
                     playing_help();
-                    yield "join";
+                    yield "\nJoined game " + params[0];
                 }
                 case "o", "observe" -> {
                     facade.listGames(auth.authToken());
                     state = game_state.OBSERVING;
                     observing_help();
-                    yield "observe";
+                    yield "\nObserving";
                 }
                 case "lo", "logout" -> {
                     facade.logout(auth.authToken());
                     state = game_state.LOGGED_OUT;
                     logout_help();
-                    yield "logout";
+                    yield "\nLogged out";
                 }
                 case "q", "quit" -> {
                     res = "quit";
-                    yield "quit";
+                    yield "Bye!";
                 }
                 case "h", "help" -> {
                     login_help();
-                    yield "help";
+                    yield "\nHelp";
+                }
+                case "clear" -> {
+                    facade.clear();
+                    logout_help();
+                    state = game_state.LOGGED_OUT;
+                    yield "\nDatabase Cleared, logged out";
                 }
                 default -> {
                     login_help();
-                    yield "bad command";
+                    yield "\nBad command";
                 }
             };
         } catch (BadRequestException ex){
@@ -292,6 +298,7 @@ public class Client {
         System.out.println("  \u001b[33;49;1m\"o\"/\"observe\" <ID> \u001b[34;49;1m- a game");
         System.out.println("  \u001b[33;49;1m\"lo\"/\"logout\" \u001b[34;49;1m- when you are done");
         System.out.println("  \u001b[33;49;1m\"q\"/\"quit\" \u001b[34;49;1m- playing chess");
+        System.out.println("  \u001b[33;49;1m\"clear\" \u001b[34;49;1m- the database");
         System.out.println("  \u001b[33;49;1m\"h\"/\"help\" \u001b[34;49;1m- with possible commands\u001b[;;0m");
     }
 
