@@ -95,14 +95,14 @@ public class ServerFacade {
     private <T> T handleResponse(HttpResponse<String> response, Class<T> responseClass) throws ResponseException {
         var status = response.statusCode();
         if(!isSuccessful(status)){
-            if(status == 403){
-                System.err.println("Username already taken");
+            if(status == 400){
+                throw new BadRequestException("");
             }
             if(status == 401){
-                System.err.println("User does not exist");
+                throw new UnauthorizedException("");
             }
-            if(status == 400){
-                System.err.println("Bad request, need fields");
+            if(status == 403){
+                throw new AlreadyTakenException("");
             }
             if(status == 500){
                 System.err.println("Unknown error");

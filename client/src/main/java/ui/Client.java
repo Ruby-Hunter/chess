@@ -2,6 +2,7 @@ package ui;
 
 import chess.ChessGame;
 import datamodel.*;
+import exception.UnauthorizedException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import exception.AlreadyTakenException;
@@ -57,7 +58,7 @@ public class Client {
                 break;
             case OBSERVING:
                 System.out.print("\n[OBSERVING] >>> ");
-                print_board_white();
+//                print_board_white();
                 System.out.println(observing_eval(scanner.nextLine()));
                 break;
             default:
@@ -103,15 +104,14 @@ public class Client {
                     yield "bad command";
                 }
             };
-        } catch (AlreadyTakenException ex){
-            System.err.print("Username already taken");
-            return null;
         } catch (BadRequestException ex){
-            System.err.print("Fields not all complete");
-            return null;
+            return "Fields not all complete";
+        } catch (UnauthorizedException ex){
+            return "Wrong password";
+        } catch (AlreadyTakenException ex){
+            return "Username already taken";
         } catch (Exception ex){
-//            System.err.print("logged_out_eval error");
-            return "";
+            return "logged_out_eval error";
         }
     }
 
@@ -153,7 +153,7 @@ public class Client {
                     } else{
                         yield "Usage: join <ID> [WHITE|BLACK]";
                     }
-                    facade.joinGame(new JoinRequest(auth.authToken(), new JoinData(params[1], Integer.parseInt(params[0]))));
+                    facade.joinGame(new JoinRequest(auth.authToken(), new JoinData(params[1].toUpperCase(), Integer.parseInt(params[0]))));
                     state = game_state.PLAYING;
                     playing_help();
                     yield "join";
@@ -161,7 +161,7 @@ public class Client {
                 case "o", "observe" -> {
                     facade.listGames(auth.authToken());
                     state = game_state.OBSERVING;
-                    playing_help();
+                    observing_help();
                     yield "observe";
                 }
                 case "lo", "logout" -> {
@@ -183,9 +183,14 @@ public class Client {
                     yield "bad command";
                 }
             };
+        } catch (BadRequestException ex){
+            return "Fields not all complete";
+        } catch (UnauthorizedException ex){
+            return "Not authorized";
+        } catch (AlreadyTakenException ex){
+            return "Player already taken";
         } catch (Exception ex){
-//            System.err.print("logged_in_eval error");
-            return "";
+            return "logged_in_eval error";
         }
     }
 
@@ -248,6 +253,10 @@ public class Client {
                     observing_help();
                     yield "help";
                 }
+                case "l", "leave" -> {
+                    state = game_state.LOGGED_IN;
+                    yield "leave";
+                }
                 default -> {
                     observing_help();
                     yield "bad command";
@@ -294,6 +303,7 @@ public class Client {
     private void observing_help(){
         System.out.println(" \u001b[;;4mCommands:\u001b[;;0m");
         System.out.println("  \u001b[33;49;1m\"s\"/\"show\" \u001b[34;49;1m- the board");
+        System.out.println("  \u001b[33;49;1m\"l\"/\"leave\" \u001b[34;49;1m- the game");
         System.out.println("  \u001b[33;49;1m\"q\"/\"quit\" \u001b[34;49;1m- playing chess");
         System.out.println("  \u001b[33;49;1m\"h\"/\"help\" \u001b[34;49;1m- with possible commands\u001b[;;0m");
     }
