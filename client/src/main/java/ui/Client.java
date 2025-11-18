@@ -11,11 +11,11 @@ import java.util.Arrays;
 import java.util.Scanner;
 
 public class Client {
-    public enum gameState {
+    public enum GameState {
         INIT, LOGGED_OUT, LOGGED_IN, PLAYING, OBSERVING
     }
 
-    private gameState state;
+    private GameState state;
     private ChessGame.TeamColor color;
     private String res;
     private final Scanner scanner;
@@ -24,7 +24,7 @@ public class Client {
     AuthData auth;
 
     public Client(String port){
-        state = gameState.INIT;
+        state = GameState.INIT;
         res = "";
         url = "http://localhost:" + port;
         scanner = new Scanner(System.in);
@@ -42,7 +42,7 @@ public class Client {
         switch(state){
             case INIT:
                 System.out.println("Welcome to chess! Type \"Help\" to list commands.");
-                state = gameState.LOGGED_OUT;
+                state = GameState.LOGGED_OUT;
                 logoutHelp();
             case LOGGED_OUT:
                 System.out.print("\n[LOGGED OUT: Not playing] >>> ");
@@ -81,7 +81,7 @@ public class Client {
                         yield "Usage: register <USERNAME> <EMAIL> <PASSWORD>";
                     }
                     auth = facade.register(new UserData(params[0], params[1], params[2]));
-                    state = gameState.LOGGED_IN;
+                    state = GameState.LOGGED_IN;
                     loginHelp();
                     yield "\nRegistered";
                 }
@@ -90,7 +90,7 @@ public class Client {
                         yield "Usage: login <USERNAME> <PASSWORD>";
                     }
                     auth = facade.login(new LoginData(params[0], params[1]));
-                    state = gameState.LOGGED_IN;
+                    state = GameState.LOGGED_IN;
                     loginHelp();
                     yield "\nLogged in";
                 }
@@ -155,19 +155,19 @@ public class Client {
                         yield "Usage: join <ID> [WHITE|BLACK]";
                     }
                     facade.joinGame(new JoinRequest(auth.authToken(), new JoinData(params[1].toUpperCase(), Integer.parseInt(params[0]))));
-                    state = gameState.PLAYING;
+                    state = GameState.PLAYING;
                     playingHelp();
                     yield "\nJoined game " + params[0];
                 }
                 case "o", "observe" -> {
                     facade.listGames(auth.authToken());
-                    state = gameState.OBSERVING;
+                    state = GameState.OBSERVING;
                     observingHelp();
                     yield "\nObserving";
                 }
                 case "lo", "logout" -> {
                     facade.logout(auth.authToken());
-                    state = gameState.LOGGED_OUT;
+                    state = GameState.LOGGED_OUT;
                     logoutHelp();
                     yield "\nLogged out";
                 }
@@ -182,7 +182,7 @@ public class Client {
                 case "clear" -> {
                     facade.clear();
                     logoutHelp();
-                    state = gameState.LOGGED_OUT;
+                    state = GameState.LOGGED_OUT;
                     yield "\nDatabase Cleared, logged out";
                 }
                 default -> {
@@ -220,7 +220,7 @@ public class Client {
                 }
                 case "l", "leave" -> {
                     color = null;
-                    state = gameState.LOGGED_IN;
+                    state = GameState.LOGGED_IN;
                     yield "leave";
                 }
                 case "q", "quit" -> {
@@ -260,7 +260,7 @@ public class Client {
                     yield "help";
                 }
                 case "l", "leave" -> {
-                    state = gameState.LOGGED_IN;
+                    state = GameState.LOGGED_IN;
                     yield "leave";
                 }
                 default -> {
