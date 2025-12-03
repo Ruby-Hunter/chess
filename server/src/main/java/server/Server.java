@@ -30,6 +30,7 @@ public class Server {
         server.get("game", ctx -> listGames(ctx));
         server.post("game", ctx -> createGame(ctx));
         server.put("game", ctx -> joinGame(ctx));
+
     }
 
     private void register(Context ctx){
