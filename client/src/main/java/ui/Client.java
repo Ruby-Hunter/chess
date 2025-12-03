@@ -3,10 +3,13 @@ package ui;
 import chess.ChessGame;
 import datamodel.*;
 import exception.UnauthorizedException;
+import jakarta.websocket.DeploymentException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import exception.*;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.Scanner;
 
@@ -20,6 +23,7 @@ public class Client {
     private String res;
     private final Scanner scanner;
     private final ServerFacade facade;
+    private final String uriString;
     private WebSocketFacade wsFacade;
     AuthData auth;
 
@@ -27,14 +31,9 @@ public class Client {
         state = GameState.INIT;
         res = "";
         String url = "http://localhost:" + port;
-        String uriString = "ws://localhost:" + port + "/ws";
+        uriString = "ws://localhost:" + port + "/ws";
         scanner = new Scanner(System.in);
         facade = new ServerFacade(url);
-        try{
-            wsFacade = new WebSocketFacade(uriString);
-        } catch(Exception ex){
-            System.err.println("Couldn't connect to websocket");
-        }
     }
 
     // Loops the tick function
@@ -150,6 +149,7 @@ public class Client {
                     yield "";
                 }
                 case "j", "join" -> {
+                    wsFacade = new WebSocketFacade(uriString);
                     if(params.length != 2){
                         yield "Usage: join <ID> [WHITE|BLACK]";
                     }
@@ -166,7 +166,7 @@ public class Client {
                     yield "\nJoined game " + params[0];
                 }
                 case "o", "observe" -> {
-                    facade.listGames(auth.authToken());
+                    wsFacade = new WebSocketFacade(uriString);
                     state = GameState.OBSERVING;
                     observingHelp();
                     yield "\nObserving";
@@ -202,6 +202,8 @@ public class Client {
             return "Not authorized";
         } catch (AlreadyTakenException ex){
             return "Player already taken";
+        } catch (URISyntaxException | DeploymentException | IOException ex){
+            return "Websocket creation error";
         } catch (Exception ex){
             return "logged_in_eval error";
         }
@@ -255,6 +257,7 @@ public class Client {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "s", "show" -> {
+                    wsFacade.send("Observe");
                     printBoardWhite();
                     yield "show";
                 }
