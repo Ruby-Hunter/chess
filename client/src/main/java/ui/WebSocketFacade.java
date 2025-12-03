@@ -15,7 +15,6 @@ public class WebSocketFacade extends Endpoint{
 
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Enter a message you want to echo:");
         while(true) {
             client.send(scanner.nextLine());
         }
@@ -29,7 +28,6 @@ public class WebSocketFacade extends Endpoint{
         this.session.addMessageHandler(new MessageHandler.Whole<String>() {
             public void onMessage(String message) {
                 System.out.println(message);
-                System.out.println("\nEnter another message you want to echo:");
             }
         });
     }

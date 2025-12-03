@@ -26,6 +26,8 @@ public class Client {
     private final String uriString;
     private WebSocketFacade wsFacade;
     AuthData auth;
+    long lastTime;
+    long now;
 
     public Client(String port) {
         state = GameState.INIT;
@@ -34,12 +36,17 @@ public class Client {
         uriString = "ws://localhost:" + port + "/ws";
         scanner = new Scanner(System.in);
         facade = new ServerFacade(url);
+        lastTime = System.currentTimeMillis();
     }
 
     // Loops the tick function
     public void loop(){
         while(!res.equals("quit")){
-            tick();
+            now = System.currentTimeMillis();
+            if(now - lastTime >= 100) {
+                lastTime = now;
+                tick();
+            }
         }
     }
 
@@ -69,6 +76,7 @@ public class Client {
             default:
                 throw new IllegalStateException("No client state error");
         }
+        lastTime = System.currentTimeMillis();
     }
 
     /*
