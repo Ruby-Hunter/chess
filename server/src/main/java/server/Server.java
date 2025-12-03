@@ -8,6 +8,7 @@ import io.javalin.http.Context;
 import exception.AlreadyTakenException;
 import exception.BadRequestException;
 import exception.UnauthorizedException;
+import server.websocket.WebSocketHandler;
 import service.UserService;
 
 import java.util.Map;
@@ -16,9 +17,11 @@ public class Server {
 
     private final Javalin server;
     private final UserService userServ;
+    private WebSocketHandler wsHandler;
 
     public Server() {
         var dataAccess = new SqlDataAccess();
+        wsHandler = new WebSocketHandler();
         userServ = new UserService(dataAccess);
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
@@ -30,7 +33,14 @@ public class Server {
         server.get("game", ctx -> listGames(ctx));
         server.post("game", ctx -> createGame(ctx));
         server.put("game", ctx -> joinGame(ctx));
-
+        server.ws("ws", ws -> {
+            ws.onConnect(ctx -> {
+                ctx.enableAutomaticPings();
+                System.err.println("Websocket connected");
+            });
+            ws.onMessage(ctx -> wsHandler.echo(ctx));
+            ws.onClose(_ -> wsHandler.closeMessage());
+        });
     }
 
     private void register(Context ctx){

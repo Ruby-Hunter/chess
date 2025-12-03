@@ -19,16 +19,22 @@ public class Client {
     private ChessGame.TeamColor color;
     private String res;
     private final Scanner scanner;
-    private final String url;
-    ServerFacade facade;
+    private final ServerFacade facade;
+    private WebSocketFacade wsFacade;
     AuthData auth;
 
-    public Client(String port){
+    public Client(String port) {
         state = GameState.INIT;
         res = "";
-        url = "http://localhost:" + port;
+        String url = "http://localhost:" + port;
+        String uriString = "ws://localhost:" + port + "/ws";
         scanner = new Scanner(System.in);
         facade = new ServerFacade(url);
+        try{
+            wsFacade = new WebSocketFacade(uriString);
+        } catch(Exception ex){
+            System.err.println("Couldn't connect to websocket");
+        }
     }
 
     // Loops the tick function
@@ -208,6 +214,7 @@ public class Client {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "m", "move" -> {
+                    wsFacade.send("Move, fatty!");
                     yield "move";
                 }
                 case "s", "show" -> {
