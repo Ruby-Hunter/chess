@@ -1,29 +1,46 @@
 package server.websocket;
 
-import io.javalin.Javalin;
-import io.javalin.http.Context;
+import com.google.gson.Gson;
 import io.javalin.websocket.WsMessageContext;
+import websocket.messages.ServerMessage;
 
 public class WebSocketHandler {
-//    public static void main(String[] args) {
-//        Javalin.create()
-//                .get("/echo/{msg}", ctx -> ctx.result("HTTP response: " + ctx.pathParam("msg")))
-//                .ws("/ws", ws -> {
-//                    ws.onConnect(ctx -> {
-//                        ctx.enableAutomaticPings();
-//                        System.out.println("Websocket connected");
-//                    });
-//                    ws.onMessage(ctx -> ctx.send("WebSocket response:" + ctx.message()));
-//                    ws.onClose(_ -> System.out.println("Websocket closed"));
-//                })
-//                .start(8080);
-//    }
 
     public WebSocketHandler(){
     }
 
+    public void handleMessage(WsMessageContext ctx){
+        var msg = new Gson().fromJson(ctx.message(), ServerMessage.class);
+        switch(msg.getServerMessageType()){
+            case NOTIFICATION -> {
+                handleNotification(ctx);
+            }
+            case ERROR -> {
+                handleError(ctx);
+            }
+            case LOAD_GAME -> {
+                handleLoadGame(ctx);
+            }
+            default -> {
+                echo(ctx);
+            }
+        }
+    }
+
+    private void handleNotification(WsMessageContext ctx){
+        ctx.send("Notification");
+    }
+
+    private void handleError(WsMessageContext ctx){
+        ctx.send("Error");
+    }
+
+    private void handleLoadGame(WsMessageContext ctx){
+        ctx.send("Game loaded");
+    }
+
     public void echo(WsMessageContext ctx){
-        ctx.send("WebSocket response:" + ctx.message());
+        ctx.send("Echoing WebSocket response:" + ctx.message());
     }
 
     public void closeMessage(){

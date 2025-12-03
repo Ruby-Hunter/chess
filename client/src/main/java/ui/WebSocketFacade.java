@@ -1,6 +1,8 @@
 package ui;
 
+import com.google.gson.Gson;
 import jakarta.websocket.*;
+import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.net.URI;
@@ -10,15 +12,15 @@ import java.util.Scanner;
 public class WebSocketFacade extends Endpoint{
     public Session session;
 
-    public static void main(String[] args) throws Exception {
-        WebSocketFacade client = new WebSocketFacade("299");
-
-        Scanner scanner = new Scanner(System.in);
-
-        while(true) {
-            client.send(scanner.nextLine());
-        }
-    }
+//    public static void main(String[] args) throws Exception {
+//        WebSocketFacade client = new WebSocketFacade("299");
+//
+//        Scanner scanner = new Scanner(System.in);
+//
+//        while(true) {
+//            client.send(scanner.nextLine());
+//        }
+//    }
 
     public WebSocketFacade(String uriString) throws Exception {
         URI uri = new URI(uriString);
@@ -32,8 +34,9 @@ public class WebSocketFacade extends Endpoint{
         });
     }
 
-    public void send(String message) throws IOException {
-        session.getBasicRemote().sendText(message);
+    public void send(ServerMessage msg) throws IOException {
+        String jsonMsg = new Gson().toJson(msg);
+        session.getBasicRemote().sendText(jsonMsg);
     }
 
     // This method must be overridden, but we don't have to do anything with it

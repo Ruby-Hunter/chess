@@ -7,6 +7,7 @@ import jakarta.websocket.DeploymentException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import exception.*;
+import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -224,7 +225,7 @@ public class Client {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "m", "move" -> {
-                    wsFacade.send("Move, fatty!");
+                    wsFacade.send(new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, "Move, fatty!"));
                     yield "move";
                 }
                 case "s", "show" -> {
@@ -265,7 +266,7 @@ public class Client {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "s", "show" -> {
-                    wsFacade.send("Observe");
+                    wsFacade.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Observing"));
                     printBoardWhite();
                     yield "show";
                 }
