@@ -12,15 +12,6 @@ import java.util.Scanner;
 public class WebSocketFacade extends Endpoint{
     public Session session;
 
-//    public static void main(String[] args) throws Exception {
-//        WebSocketFacade client = new WebSocketFacade("299");
-//
-//        Scanner scanner = new Scanner(System.in);
-//
-//        while(true) {
-//            client.send(scanner.nextLine());
-//        }
-//    }
 
     public WebSocketFacade(String uriString) throws Exception {
         URI uri = new URI(uriString);
