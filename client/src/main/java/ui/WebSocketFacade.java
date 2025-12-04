@@ -2,6 +2,7 @@ package ui;
 
 import com.google.gson.Gson;
 import jakarta.websocket.*;
+import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -25,9 +26,9 @@ public class WebSocketFacade extends Endpoint{
         });
     }
 
-    public void send(ServerMessage msg) throws IOException {
-        String jsonMsg = new Gson().toJson(msg);
-        session.getBasicRemote().sendText(jsonMsg);
+    public void send(UserGameCommand cmd) throws IOException {
+        String jsonCmd = new Gson().toJson(cmd);
+        session.getBasicRemote().sendText(jsonCmd);
     }
 
     // This method must be overridden, but we don't have to do anything with it

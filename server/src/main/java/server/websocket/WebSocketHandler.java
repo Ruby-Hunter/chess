@@ -2,24 +2,31 @@ package server.websocket;
 
 import com.google.gson.Gson;
 import io.javalin.websocket.WsMessageContext;
+import org.eclipse.jetty.server.Authentication;
+import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
+import websocket.messages.ServerNotificationMessage;
 
 public class WebSocketHandler {
+    Gson ser = new Gson();
 
     public WebSocketHandler(){
     }
 
     public void handleMessage(WsMessageContext ctx){
-        var msg = new Gson().fromJson(ctx.message(), ServerMessage.class);
-        switch(msg.getServerMessageType()){
-            case NOTIFICATION -> {
-                handleNotification(ctx);
+        UserGameCommand cmd = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+        switch(cmd.getCommandType()){
+            case CONNECT -> {
+                handleConnect(ctx, cmd);
             }
-            case ERROR -> {
-                handleError(ctx);
+            case MAKE_MOVE -> {
+                handleMove(ctx, cmd);
             }
-            case LOAD_GAME -> {
-                handleLoadGame(ctx);
+            case LEAVE -> {
+                handleLeave(ctx, cmd);
+            }
+            case RESIGN -> {
+                handleResign(ctx, cmd);
             }
             default -> {
                 echo(ctx);
@@ -27,16 +34,21 @@ public class WebSocketHandler {
         }
     }
 
-    private void handleNotification(WsMessageContext ctx){
-        ctx.send(new Gson().toJson(ctx.message()));
+    private void handleConnect(WsMessageContext ctx, UserGameCommand cmd){
+        ctx.send(ser.toJson(new ServerNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                "Notification")));
     }
 
-    private void handleError(WsMessageContext ctx){
-        ctx.send(new Gson().toJson(ctx.message()));
+    private void handleMove(WsMessageContext ctx, UserGameCommand cmd){
+        ctx.send(ser.toJson(ctx.message()));
     }
 
-    private void handleLoadGame(WsMessageContext ctx){
-        ctx.send(new Gson().toJson(ctx.message()));
+    private void handleLeave(WsMessageContext ctx, UserGameCommand cmd){
+        ctx.send(ser.toJson(ctx.message()));
+    }
+
+    private void handleResign(WsMessageContext ctx, UserGameCommand cmd){
+        ctx.send(ser.toJson(ctx.message()));
     }
 
     public void echo(WsMessageContext ctx){
