@@ -2,6 +2,8 @@ package ui;
 
 import chess.ChessBoard;
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPosition;
 import datamodel.*;
 import exception.UnauthorizedException;
 import jakarta.websocket.DeploymentException;
@@ -9,6 +11,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import exception.*;
 import websocket.commands.UserGameCommand;
+import websocket.commands.UserMoveCommand;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -29,9 +32,9 @@ public class Client {
     private final String uriString;
     private WebSocketFacade wsFacade;
     private ChessBoard curBoard;
-    AuthData auth;
-    long lastTime;
-    long now;
+    private AuthData auth;
+    private int gameID;
+    private long lastTime;
 
     public Client(String port) {
         state = GameState.INIT;
@@ -46,7 +49,7 @@ public class Client {
     // Loops the tick function
     public void loop(){
         while(!res.equals("quit")){
-            now = System.currentTimeMillis();
+            long now = System.currentTimeMillis();
             if(now - lastTime >= 100) {
                 lastTime = now;
                 tick();
@@ -172,7 +175,7 @@ public class Client {
                     } else{
                         yield "Usage: join <ID> [WHITE|BLACK]";
                     }
-                    int gameID = Integer.parseInt(params[0]);
+                    gameID = Integer.parseInt(params[0]);
                     facade.joinGame(new JoinRequest(auth.authToken(), new JoinData(inputColor, gameID)));
                     wsFacade = new WebSocketFacade(uriString);
                     wsFacade.send(new UserGameCommand(UserGameCommand.CommandType.CONNECT, auth.authToken(), gameID));
@@ -233,7 +236,12 @@ public class Client {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "m", "move" -> {
-                    wsFacade.send(new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, "Move, fatty!"));
+                    if(params.length != 2){
+                        yield "Usage: move <POS1> <POS2>";
+                    }
+                    ChessPosition oldPos = new ChessPosition(params[0], );
+                    ChessPosition newPos = new ChessPosition(params[1]);
+                    wsFacade.send(new UserMoveCommand(UserGameCommand.CommandType.MAKE_MOVE, auth.authToken(), gameID, ));
                     yield "move";
                 }
                 case "s", "show" -> {
