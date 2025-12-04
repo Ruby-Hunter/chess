@@ -7,7 +7,6 @@ import websocket.messages.ServerMessage;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Scanner;
 
 public class WebSocketFacade extends Endpoint{
     public Session session;
