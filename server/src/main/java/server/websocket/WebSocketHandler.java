@@ -36,19 +36,22 @@ public class WebSocketHandler {
 
     private void handleConnect(WsMessageContext ctx, UserGameCommand cmd){
         ctx.send(ser.toJson(new ServerNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
-                "Notification")));
+                "Websocket Connected")));
     }
 
     private void handleMove(WsMessageContext ctx, UserGameCommand cmd){
-        ctx.send(ser.toJson(ctx.message()));
+        ctx.send(ser.toJson(new ServerNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                "Notification")));
     }
 
     private void handleLeave(WsMessageContext ctx, UserGameCommand cmd){
-        ctx.send(ser.toJson(ctx.message()));
+        ctx.send(ser.toJson(new ServerNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                "Notification")));
     }
 
     private void handleResign(WsMessageContext ctx, UserGameCommand cmd){
-        ctx.send(ser.toJson(ctx.message()));
+        ctx.send(ser.toJson(new ServerNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
+                "Notification")));
     }
 
     public void echo(WsMessageContext ctx){

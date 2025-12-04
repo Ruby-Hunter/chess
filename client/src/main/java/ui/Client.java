@@ -8,6 +8,7 @@ import jakarta.websocket.DeploymentException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import exception.*;
+import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
@@ -160,21 +161,24 @@ public class Client {
                     yield "";
                 }
                 case "j", "join" -> {
-                    wsFacade = new WebSocketFacade(uriString);
                     if(params.length != 2){
                         yield "Usage: join <ID> [WHITE|BLACK]";
                     }
-                    if(params[1].toUpperCase().equals("WHITE")){
+                    String inputColor = params[1].toUpperCase();
+                    if(inputColor.equals("WHITE")){
                         color = ChessGame.TeamColor.WHITE;
-                    } else if(params[1].toUpperCase().equals("BLACK")){
+                    } else if(inputColor.equals("BLACK")){
                         color = ChessGame.TeamColor.BLACK;
                     } else{
                         yield "Usage: join <ID> [WHITE|BLACK]";
                     }
-                    facade.joinGame(new JoinRequest(auth.authToken(), new JoinData(params[1].toUpperCase(), Integer.parseInt(params[0]))));
+                    int gameID = Integer.parseInt(params[0]);
+                    facade.joinGame(new JoinRequest(auth.authToken(), new JoinData(inputColor, gameID)));
+                    wsFacade = new WebSocketFacade(uriString);
+                    wsFacade.send(new UserGameCommand(UserGameCommand.CommandType.CONNECT, auth.authToken(), gameID));
                     state = GameState.PLAYING;
                     playingHelp();
-                    yield "\nJoined game " + params[0];
+                    yield "\nJoined game " + gameID;
                 }
                 case "o", "observe" -> {
                     wsFacade = new WebSocketFacade(uriString);
@@ -207,6 +211,8 @@ public class Client {
                     yield "\nBad command";
                 }
             };
+        } catch (NumberFormatException e) {
+            return "<ID> must be an int";
         } catch (BadRequestException ex){
             return "Fields not all complete";
         } catch (UnauthorizedException ex){
@@ -268,7 +274,7 @@ public class Client {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "s", "show" -> {
-                    wsFacade.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Observing"));
+
                     BoardPrinter.printBoardWhite(curBoard);
                     yield "show";
                 }
