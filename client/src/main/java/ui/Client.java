@@ -232,9 +232,9 @@ public class Client {
                 }
                 case "s", "show" -> {
                     if(color == null || color == ChessGame.TeamColor.WHITE){
-                        printBoardWhite();
+                        BoardPrinter.printBoardWhite(curBoard);
                     } else{
-                        printBoardBlack();
+                        BoardPrinter.printBoardBlack(curBoard);
                     }
                     yield "show";
                 }
@@ -269,7 +269,7 @@ public class Client {
             return switch (cmd) {
                 case "s", "show" -> {
                     wsFacade.send(new ServerMessage(ServerMessage.ServerMessageType.ERROR, "Observing"));
-                    printBoardWhite();
+                    BoardPrinter.printBoardWhite(curBoard);
                     yield "show";
                 }
                 case "q", "quit" -> {
@@ -337,69 +337,4 @@ public class Client {
         System.out.println("  \u001b[33;49;1m\"q\"/\"quit\" \u001b[34;49;1m- playing chess");
         System.out.println("  \u001b[33;49;1m\"h\"/\"help\" \u001b[34;49;1m- with possible commands\u001b[;;0m");
     }
-
-    /*
-    --------Board Prints--------
-     */
-    // Sides: [30;100;1m
-    // Blank White: [;107;1m
-    // Blank Black: [;40;1m
-    // White on White: [34;107;1m
-    // White on Black: [34;40;1m
-    // Black on White: [31;107;1m
-    // Black on Black: [31;40;1m
-    public void printBoardWhite(){
-        System.out.println("\u001b[30;100;1m    a  b  c  d  e  f  g  h    \u001b[;;0m");
-        System.out.println("\u001b[30;100;1m 8 \u001b[34;107;1m R \u001b[34;40;1m N \u001b[34;107;1m B " + //Black
-                "\u001b[34;40;1m Q \u001b[34;107;1m K \u001b[34;40;1m B \u001b[34;107;1m N " +
-                "\u001b[34;40;1m R \u001b[30;100;1m 8 \u001b[;;0m");
-        System.out.println("\u001b[30;100;1m 7 \u001b[34;40;1m P \u001b[34;107;1m P \u001b[34;40;1m P " + //Black Pawns
-                "\u001b[34;107;1m P \u001b[34;40;1m P \u001b[34;107;1m P \u001b[34;40;1m P " +
-                "\u001b[34;107;1m P \u001b[30;100;1m 7 \u001b[;;0m");
-
-        System.out.println("\u001b[30;100;1m 6 \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   " +//W
-                "\u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001b[30;100;1m 6 \u001b[;;0m");
-        System.out.println("\u001b[30;100;1m 5 \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   " +//B
-                "\u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001b[30;100;1m 5 \u001b[;;0m");
-        System.out.println("\u001b[30;100;1m 4 \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   " +
-                "\u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001b[30;100;1m 4 \u001b[;;0m");
-        System.out.println("\u001b[30;100;1m 3 \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   " +
-                "\u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001b[30;100;1m 3 \u001b[;;0m");
-
-        System.out.println("\u001b[30;100;1m 2 \u001b[31;107;1m P \u001b[31;40;1m P \u001b[31;107;1m P " + //White Pawns
-                "\u001b[31;40;1m P \u001b[31;107;1m P \u001b[31;40;1m P \u001b[31;107;1m P " +
-                "\u001b[31;40;1m P \u001b[30;100;1m 2 \u001b[;;0m");
-        System.out.println("\u001b[30;100;1m 1 \u001b[31;40;1m R \u001b[31;107;1m N \u001b[31;40;1m B " + //White
-                "\u001b[31;107;1m Q \u001b[31;40;1m K \u001b[31;107;1m B \u001b[31;40;1m N " +
-                "\u001b[31;107;1m R \u001b[30;100;1m 1 \u001b[;;0m");
-        System.out.println("\u001b[30;100;1m    a  b  c  d  e  f  g  h    \u001b[;;0m\n");
-    }
-
-    public void printBoardBlack(){
-        System.out.println("\u001b[30;100;1m    h  g  f  e  d  c  b  a    \u001b[;;0m");
-        System.out.println("\u001b[30;100;1m 1 \u001b[31;107;1m R \u001b[31;40;1m N \u001b[31;107;1m B " + //White
-                "\u001b[31;40;1m ♔ \u001b[31;107;1m Q \u001b[31;40;1m B \u001b[31;107;1m N " +
-                "\u001b[31;40;1m R \u001b[30;100;1m 1 \u001b[;;0m");
-        System.out.println("\u001b[30;100;1m 2 \u001b[31;40;1m P \u001b[31;107;1m P \u001b[31;40;1m P " + //White Pawns
-                "\u001b[31;107;1m P\u2003\u001b[31;40;1m P \u001b[31;107;1m P \u001b[31;40;1m P " +
-                "\u001b[31;107;1m P \u001b[30;100;1m 2 \u001b[;;0m");
-
-        System.out.println("\u001b[30;100;1m 3 \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   " +//W
-                "\u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001b[30;100;1m 3 \u001b[;;0m");
-        System.out.println("\u001b[30;100;1m 4 \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   " +//B
-                "\u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001b[30;100;1m 4 \u001b[;;0m");
-        System.out.println("\u001b[30;100;1m 5 \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   " +//W
-                "\u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001b[30;100;1m 5 \u001b[;;0m");
-        System.out.println("\u001b[30;100;1m 6 \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   " +//B
-                "\u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001b[30;100;1m 6 \u001b[;;0m");
-
-        System.out.println("\u001b[30;100;1m 7 \u001b[34;107;1m P \u001b[34;40;1m P \u001b[34;107;1m P " + //Black Pawns
-                "\u001b[34;40;1m P \u001b[34;107;1m P \u001b[34;40;1m P \u001b[34;107;1m P " +
-                "\u001b[34;40;1m P \u001b[30;100;1m 7 \u001b[;;0m");
-        System.out.println("\u001b[30;100;1m 8 \u001b[34;40;1m R \u001b[34;107;1m N \u001b[34;40;1m B " + //Black
-                "\u001b[34;107;1m K \u001b[34;40;1m Q \u001b[34;107;1m B \u001b[34;40;1m N " +
-                "\u001b[34;107;1m R \u001b[30;100;1m 8 \u001b[;;0m");
-        System.out.println("\u001b[30;100;1m    h  g  f  e  d  c  b  a    \u001b[;;0m\n");
-    }
-
 }
