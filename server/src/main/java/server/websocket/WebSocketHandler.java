@@ -28,15 +28,15 @@ public class WebSocketHandler {
     }
 
     private void handleNotification(WsMessageContext ctx){
-        ctx.send("Notification");
+        ctx.send(new Gson().toJson(ctx.message()));
     }
 
     private void handleError(WsMessageContext ctx){
-        ctx.send("Error");
+        ctx.send(new Gson().toJson(ctx.message()));
     }
 
     private void handleLoadGame(WsMessageContext ctx){
-        ctx.send("Game loaded");
+        ctx.send(new Gson().toJson(ctx.message()));
     }
 
     public void echo(WsMessageContext ctx){

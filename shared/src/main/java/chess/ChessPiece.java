@@ -70,10 +70,50 @@ public class ChessPiece {
         return calc.pieceMoves(board, myPosition);
     }
 
+    /**
+     * Chess piece Unicode characters
+     */
+    private enum ChessPieceType {
+        WHITE_KING("♔"), WHITE_QUEEN("♕"), WHITE_ROOK("♖"),
+        WHITE_BISHOP("♗"), WHITE_KNIGHT("♘"), WHITE_PAWN("♙"),
+        BLACK_KING("♚"), BLACK_QUEEN("♛"), BLACK_ROOK("♜"),
+        BLACK_BISHOP("♝"), BLACK_KNIGHT("♞"), BLACK_PAWN("♟");
+
+        private final String unicodeChar;
+
+        ChessPieceType(String unicodeChar) {
+            this.unicodeChar = unicodeChar;
+        }
+
+        public String getUnicodeChar() {
+            return unicodeChar;
+        }
+    }
+
+    /**
+     * @return Chess piece ascii character based on type and color
+     */
     @Override
     public String toString() {
-        return "C=" + pieceColor +
-                ", T=" + type + "|";
+        if(pieceColor == ChessGame.TeamColor.WHITE){
+            return switch(type){
+                case KING -> ChessPieceType.WHITE_KING.getUnicodeChar();
+                case QUEEN -> ChessPieceType.WHITE_QUEEN.getUnicodeChar();
+                case BISHOP -> ChessPieceType.WHITE_BISHOP.getUnicodeChar();
+                case KNIGHT -> ChessPieceType.WHITE_KNIGHT.getUnicodeChar();
+                case ROOK -> ChessPieceType.WHITE_ROOK.getUnicodeChar();
+                case PAWN -> ChessPieceType.WHITE_PAWN.getUnicodeChar();
+            };
+        } else{
+            return switch(type){
+                case KING -> ChessPieceType.BLACK_KING.getUnicodeChar();
+                case QUEEN -> ChessPieceType.BLACK_QUEEN.getUnicodeChar();
+                case BISHOP -> ChessPieceType.BLACK_BISHOP.getUnicodeChar();
+                case KNIGHT -> ChessPieceType.BLACK_KNIGHT.getUnicodeChar();
+                case ROOK -> ChessPieceType.BLACK_ROOK.getUnicodeChar();
+                case PAWN -> ChessPieceType.BLACK_PAWN.getUnicodeChar();
+            };
+        }
     }
 
     @Override

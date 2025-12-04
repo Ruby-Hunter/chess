@@ -1,5 +1,6 @@
 package ui;
 
+import chess.ChessBoard;
 import chess.ChessGame;
 import datamodel.*;
 import exception.UnauthorizedException;
@@ -26,6 +27,7 @@ public class Client {
     private final ServerFacade facade;
     private final String uriString;
     private WebSocketFacade wsFacade;
+    private ChessBoard curBoard;
     AuthData auth;
     long lastTime;
     long now;
@@ -376,10 +378,10 @@ public class Client {
     public void printBoardBlack(){
         System.out.println("\u001b[30;100;1m    h  g  f  e  d  c  b  a    \u001b[;;0m");
         System.out.println("\u001b[30;100;1m 1 \u001b[31;107;1m R \u001b[31;40;1m N \u001b[31;107;1m B " + //White
-                "\u001b[31;40;1m K \u001b[31;107;1m Q \u001b[31;40;1m B \u001b[31;107;1m N " +
+                "\u001b[31;40;1m ♔ \u001b[31;107;1m Q \u001b[31;40;1m B \u001b[31;107;1m N " +
                 "\u001b[31;40;1m R \u001b[30;100;1m 1 \u001b[;;0m");
         System.out.println("\u001b[30;100;1m 2 \u001b[31;40;1m P \u001b[31;107;1m P \u001b[31;40;1m P " + //White Pawns
-                "\u001b[31;107;1m P \u001b[31;40;1m P \u001b[31;107;1m P \u001b[31;40;1m P " +
+                "\u001b[31;107;1m P\u2003\u001b[31;40;1m P \u001b[31;107;1m P \u001b[31;40;1m P " +
                 "\u001b[31;107;1m P \u001b[30;100;1m 2 \u001b[;;0m");
 
         System.out.println("\u001b[30;100;1m 3 \u001B[;107;1m   \u001B[;40;1m   \u001B[;107;1m   \u001B[;40;1m   " +//W
