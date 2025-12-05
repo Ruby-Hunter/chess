@@ -236,12 +236,19 @@ public class Client {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "m", "move" -> {
-                    if(params.length != 2){
+                    if(params.length != 2) {
                         yield "Usage: move <POS1> <POS2>";
                     }
-                    ChessPosition oldPos = new ChessPosition(params[0], );
-                    ChessPosition newPos = new ChessPosition(params[1]);
-                    wsFacade.send(new UserMoveCommand(UserGameCommand.CommandType.MAKE_MOVE, auth.authToken(), gameID, ));
+                    if((params[0].length() != 2) || (params[1].length() != 2)){
+                        yield "<POS> must be a <CHAR-INT>. Ex: <A3>";
+                    }
+                    int oldCol = params[0].toUpperCase().charAt(0) - 64;
+                    System.err.println(oldCol);
+                    int oldRow = params[0].charAt(1) - 48;
+                    System.err.println(oldRow);
+//                    ChessPosition oldPos = new ChessPosition();
+//                    ChessPosition newPos = new ChessPosition();
+//                    wsFacade.send(new UserMoveCommand(UserGameCommand.CommandType.MAKE_MOVE, auth.authToken(), gameID, ));
                     yield "move";
                 }
                 case "s", "show" -> {
@@ -270,8 +277,10 @@ public class Client {
                     yield "bad command";
                 }
             };
+        } catch (NumberFormatException e) {
+            return "<POS> must be a <CHAR-INT>. Ex: <A3>";
         } catch (Exception ex){
-            return "playing_eval error";
+            return "playing_eval error: " + ex.getMessage();
         }
     }
 
