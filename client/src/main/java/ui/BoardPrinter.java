@@ -1,6 +1,7 @@
 package ui;
 
 import chess.ChessBoard;
+import chess.ChessGame;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
@@ -20,6 +21,11 @@ public class BoardPrinter {
     private static final String H_ROW = SIDES + MD_SP+" "+DUB_SP+"h"+DUB_SP+"g"+DUB_SP+"f"+DUB_SP+"e"+DUB_SP+
             "d"+DUB_SP+"c"+DUB_SP+"b"+DUB_SP+"a"+DUB_SP+" "+MD_SP + RESET + NL;
     private static String boardString;
+
+    public static String printBoard(ChessGame game){
+        return game.getTeamTurn() == ChessGame.TeamColor.WHITE ?
+                printBoardWhite(game.getBoard()) : printBoardBlack(game.getBoard());
+    }
 
     public static String printBoardWhite(ChessBoard board){
         boardString = A_ROW;

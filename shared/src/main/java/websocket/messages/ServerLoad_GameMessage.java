@@ -14,7 +14,7 @@ public class ServerLoad_GameMessage extends ServerMessage{
         this.game = game;
     }
 
-    ChessGame getGame(){
+    public ChessGame getGame(){
         return game;
     }
 }

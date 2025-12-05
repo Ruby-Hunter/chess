@@ -243,20 +243,24 @@ public class Client {
                         yield "<POS> must be a <CHAR-INT>. Ex: <A3>";
                     }
                     int oldCol = params[0].toUpperCase().charAt(0) - 64;
-                    System.err.println(oldCol);
                     int oldRow = params[0].charAt(1) - 48;
-                    System.err.println(oldRow);
-                    ChessPosition oldPos = new ChessPosition();
-//                    ChessPosition newPos = new ChessPosition();
-//                    wsFacade.send(new UserMoveCommand(UserGameCommand.CommandType.MAKE_MOVE, auth.authToken(), gameID, ));
+                    int newCol = params[1].toUpperCase().charAt(0) - 64;
+                    int newRow = params[1].charAt(1) - 48;
+                    if((oldRow < 1 || oldRow > 8) || (oldCol < 1 || oldCol > 8))
+                        yield "<POS1> must be a valid position on chess board";
+                    if((newRow < 1 || newRow > 8) || (newCol < 1 || newCol > 8))
+                        yield "<POS2> must be a valid position on chess board";
+                    ChessPosition oldPos = new ChessPosition(oldRow, oldCol);
+                    ChessPosition newPos = new ChessPosition(newRow, newCol);
+                    wsFacade.send(new UserMoveCommand(UserGameCommand.CommandType.MAKE_MOVE, auth.authToken(), gameID,
+                            new ChessMove(oldPos, newPos, null)));
                     yield "move";
                 }
                 case "s", "show" -> {
-                    if(color == null || color == ChessGame.TeamColor.WHITE){
+                    if(color == null || color == ChessGame.TeamColor.WHITE)
                         BoardPrinter.printBoardWhite(curBoard);
-                    } else{
+                    else
                         BoardPrinter.printBoardBlack(curBoard);
-                    }
                     yield "show";
                 }
                 case "l", "leave" -> {
