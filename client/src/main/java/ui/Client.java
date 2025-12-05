@@ -246,7 +246,7 @@ public class Client {
                     System.err.println(oldCol);
                     int oldRow = params[0].charAt(1) - 48;
                     System.err.println(oldRow);
-//                    ChessPosition oldPos = new ChessPosition();
+                    ChessPosition oldPos = new ChessPosition();
 //                    ChessPosition newPos = new ChessPosition();
 //                    wsFacade.send(new UserMoveCommand(UserGameCommand.CommandType.MAKE_MOVE, auth.authToken(), gameID, ));
                     yield "move";
