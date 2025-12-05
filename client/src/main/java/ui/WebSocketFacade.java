@@ -29,8 +29,9 @@ public class WebSocketFacade extends Endpoint{
                         ServerLoad_GameMessage gameMsg = ser.fromJson(message, ServerLoad_GameMessage.class);
                         System.out.println(BoardPrinter.printBoard(gameMsg.getGame()));
                     }
+                    case ERROR -> System.out.println("You had an error");
                 }
-                System.out.println(msg.getServerMessageType().toString());
+//                System.out.println(msg.getServerMessageType().toString());
             }
         });
     }

@@ -1,6 +1,7 @@
 package server;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccess;
 import dataaccess.SqlDataAccess;
 import datamodel.*;
 import io.javalin.Javalin;
@@ -20,9 +21,9 @@ public class Server {
     private WebSocketHandler wsHandler;
 
     public Server() {
-        var dataAccess = new SqlDataAccess();
-        wsHandler = new WebSocketHandler();
+        DataAccess dataAccess = new SqlDataAccess();
         userServ = new UserService(dataAccess);
+        wsHandler = new WebSocketHandler(dataAccess);
         server = Javalin.create(config -> config.staticFiles.add("web"));
 
         // Register your endpoints and exception handlers here.

@@ -1,26 +1,35 @@
 package server.websocket;
 
 import com.google.gson.Gson;
+import dataaccess.DataAccess;
+import datamodel.GameData;
 import io.javalin.websocket.WsMessageContext;
 import org.eclipse.jetty.server.Authentication;
+import service.UserService;
 import websocket.commands.UserGameCommand;
+import websocket.commands.UserMoveCommand;
+import websocket.messages.ServerLoad_GameMessage;
 import websocket.messages.ServerMessage;
 import websocket.messages.ServerNotificationMessage;
 
 public class WebSocketHandler {
-    Gson ser = new Gson();
+    Gson ser;
+    DataAccess dataAccess;
 
-    public WebSocketHandler(){
+    public WebSocketHandler(DataAccess access){
+        ser = new Gson();
+        dataAccess = access;
     }
 
-    public void handleMessage(WsMessageContext ctx){
-        UserGameCommand cmd = new Gson().fromJson(ctx.message(), UserGameCommand.class);
+    public void handleMessage(WsMessageContext ctx) {
+        UserGameCommand cmd = ser.fromJson(ctx.message(), UserGameCommand.class);
         switch(cmd.getCommandType()){
             case CONNECT -> {
                 handleConnect(ctx, cmd);
             }
             case MAKE_MOVE -> {
-                handleMove(ctx, cmd);
+                UserMoveCommand moveCmd = ser.fromJson(ctx.message(), UserMoveCommand.class);
+                handleMove(ctx, moveCmd);
             }
             case LEAVE -> {
                 handleLeave(ctx, cmd);
@@ -34,14 +43,18 @@ public class WebSocketHandler {
         }
     }
 
-    private void handleConnect(WsMessageContext ctx, UserGameCommand cmd){
+    private void handleConnect(WsMessageContext ctx, UserGameCommand cmd) throws Exception {
+        GameData gData = dataAccess.getGame(cmd.getGameID());
+//        dataAccess.updateGame(new GameData(cmd.getGameID(), ));
         ctx.send(ser.toJson(new ServerNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
                 "Websocket Connected")));
     }
 
-    private void handleMove(WsMessageContext ctx, UserGameCommand cmd){
-        ctx.send(ser.toJson(new ServerNotificationMessage(ServerMessage.ServerMessageType.NOTIFICATION,
-                "Notification")));
+    private void handleMove(WsMessageContext ctx, UserMoveCommand cmd){
+
+//        dataAccess.updateGame(new GameData(cmd.getGameID(), ));
+//        ctx.send(ser.toJson(new ServerLoad_GameMessage(ServerMessage.ServerMessageType.LOAD_GAME,
+//                "Game loaded", )));
     }
 
     private void handleLeave(WsMessageContext ctx, UserGameCommand cmd){
