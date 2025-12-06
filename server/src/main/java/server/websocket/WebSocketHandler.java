@@ -65,27 +65,19 @@ public class WebSocketHandler {
                 ctx.send(ser.toJson(new ServerErrorMessage("user already in game")));
             }
             if (cmd.getColor() == ChessGame.TeamColor.WHITE) { // Join as White
-//                if (gData.whiteUsername() == null) {
-                    dataAccess.updateGame(new GameData(gID, uName,
-                            gData.blackUsername(), gData.gameName(), gData.game()));
-                    gameParticipants.computeIfAbsent(gID, k -> new HashMap<>());
-                    gameParticipants.get(gID).put(uName, ctx);
-                    ctx.send(ser.toJson(new ServerLoad_GameMessage("Websocket Connected",
-                            gData.game(), ChessGame.TeamColor.WHITE)));
-//                } else {
-//                    ctx.send(ser.toJson(new ServerErrorMessage("White already taken")));
-//                }
+                dataAccess.updateGame(new GameData(gID, uName,
+                        gData.blackUsername(), gData.gameName(), gData.game()));
+                gameParticipants.computeIfAbsent(gID, k -> new HashMap<>());
+                gameParticipants.get(gID).put(uName, ctx);
+                ctx.send(ser.toJson(new ServerLoad_GameMessage("Websocket Connected",
+                        gData.game(), ChessGame.TeamColor.WHITE)));
             } else if (cmd.getColor() == ChessGame.TeamColor.BLACK) { // Join as black
-//                if (gData.blackUsername() == null) {
-                    dataAccess.updateGame(new GameData(gID, gData.whiteUsername(),
-                            uName, gData.gameName(), gData.game()));
-                    gameParticipants.computeIfAbsent(gID, k -> new HashMap<>());
-                    gameParticipants.get(gID).put(uName, ctx);
-                    ctx.send(ser.toJson(new ServerLoad_GameMessage("Websocket Connected",
-                            gData.game(), ChessGame.TeamColor.BLACK)));
-//                } else {
-//                    ctx.send(ser.toJson(new ServerErrorMessage("Black already taken")));
-//                }
+                dataAccess.updateGame(new GameData(gID, gData.whiteUsername(),
+                        uName, gData.gameName(), gData.game()));
+                gameParticipants.computeIfAbsent(gID, k -> new HashMap<>());
+                gameParticipants.get(gID).put(uName, ctx);
+                ctx.send(ser.toJson(new ServerLoad_GameMessage("Websocket Connected",
+                        gData.game(), ChessGame.TeamColor.BLACK)));
             } else { // Observing
                 gameParticipants.computeIfAbsent(gID, k -> new HashMap<>());
                 gameParticipants.get(gID).put(uName, ctx);
@@ -95,7 +87,7 @@ public class WebSocketHandler {
             }
             gameParticipants.get(gID).forEach((_, curCtx) -> {
                 curCtx.send(ser.toJson(new ServerNotificationMessage(
-                        "Player " + gData.gameName() + " has joined the game as " + cmd.getColor())));
+                        "Player " + uName + " has joined the game as " + cmd.getColor())));
             });
         } catch (Exception e) {
             ctx.send(ser.toJson(new ServerErrorMessage("Error Connecting")));
@@ -105,10 +97,19 @@ public class WebSocketHandler {
     private void handleMove(WsMessageContext ctx, UserMoveCommand cmd){
         try {
             GameData gData = dataAccess.getGame(cmd.getGameID());
-            //        gData.game().makeMove(cmd.get)
-            //        dataAccess.updateGame(new GameData(cmd.getGameID(), ));
-            //        ctx.send(ser.toJson(new ServerLoad_GameMessage(ServerMessage.ServerMessageType.LOAD_GAME,
-            //                "Game loaded", )));
+            String uName = dataAccess.getAuth(cmd.getAuthToken()).username();
+
+            gData.game().makeMove(cmd.getMove());
+            dataAccess.updateGame(gData);
+            gameParticipants.get(cmd.getGameID()).forEach((curName, curCtx) -> {
+                ChessGame.TeamColor color = (Objects.equals(gData.blackUsername(), curName))
+                        ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+                if(curName.equals(uName)) {
+                    curCtx.send(ser.toJson(new ServerLoad_GameMessage("Move valid ", gData.game(), color)));
+                } else{
+                    curCtx.send(ser.toJson(new ServerLoad_GameMessage("Game loaded: ", gData.game(), color)));
+                }
+            });
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

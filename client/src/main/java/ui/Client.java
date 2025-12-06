@@ -253,7 +253,7 @@ public class Client {
                         yield "<POS2> must be a valid position on chess board";
                     ChessPosition oldPos = new ChessPosition(oldRow, oldCol);
                     ChessPosition newPos = new ChessPosition(newRow, newCol);
-                    wsFacade.send(new UserMoveCommand(UserGameCommand.CommandType.MAKE_MOVE, auth.authToken(), gameID,
+                    wsFacade.send(new UserMoveCommand(auth.authToken(), gameID,
                             new ChessMove(oldPos, newPos, null)));
                     yield "move";
                 }
@@ -264,7 +264,7 @@ public class Client {
                     wsFacade.send(new UserGameCommand(UserGameCommand.CommandType.LEAVE, auth.authToken(), gameID));
                     color = null;
                     state = GameState.LOGGED_IN;
-                    yield "leave";
+                    yield "";
                 }
                 case "q", "quit" -> {
                     res = "quit";

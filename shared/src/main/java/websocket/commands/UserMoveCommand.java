@@ -4,8 +4,12 @@ import chess.ChessMove;
 
 public class UserMoveCommand extends UserGameCommand{
     ChessMove move;
-    public UserMoveCommand(CommandType commandType, String authToken, Integer gameID, ChessMove move) {
-        super(commandType, authToken, gameID);
+    public UserMoveCommand(String authToken, Integer gameID, ChessMove move) {
+        super(CommandType.MAKE_MOVE, authToken, gameID);
         this.move = move;
+    }
+
+    public ChessMove getMove(){
+        return move;
     }
 }
