@@ -24,7 +24,7 @@ import java.util.Objects;
 public class WebSocketHandler {
     Gson ser;
     DataAccess dataAccess;
-    HashMap<Integer, HashSet<Pair<String, WsMessageContext>>> gameParticipants;
+    HashMap<Integer, HashMap<String, WsMessageContext>> gameParticipants;
 
     public WebSocketHandler(DataAccess access){
         ser = new Gson();
@@ -60,17 +60,16 @@ public class WebSocketHandler {
             int gID = cmd.getGameID();
             GameData gData = dataAccess.getGame(gID);
             String uName = dataAccess.getAuth(cmd.getAuthToken()).username();
-            var ctxData = new Pair<>(uName, ctx);
 
-            if(gameParticipants.get(gID) != null && gameParticipants.get(gID).contains(ctxData)){
+            if(gameParticipants.get(gID) != null && gameParticipants.get(gID).containsKey(uName)){
                 ctx.send(ser.toJson(new ServerErrorMessage("user already in game")));
             }
             if (cmd.getColor() == ChessGame.TeamColor.WHITE) { // Join as White
 //                if (gData.whiteUsername() == null) {
                     dataAccess.updateGame(new GameData(gID, uName,
                             gData.blackUsername(), gData.gameName(), gData.game()));
-                    gameParticipants.computeIfAbsent(gID, k -> new HashSet<>());
-                    gameParticipants.get(gID).add(ctxData);
+                    gameParticipants.computeIfAbsent(gID, k -> new HashMap<>());
+                    gameParticipants.get(gID).put(uName, ctx);
                     ctx.send(ser.toJson(new ServerLoad_GameMessage("Websocket Connected",
                             gData.game(), ChessGame.TeamColor.WHITE)));
 //                } else {
@@ -80,25 +79,24 @@ public class WebSocketHandler {
 //                if (gData.blackUsername() == null) {
                     dataAccess.updateGame(new GameData(gID, gData.whiteUsername(),
                             uName, gData.gameName(), gData.game()));
-                    gameParticipants.computeIfAbsent(gID, k -> new HashSet<>());
-                    gameParticipants.get(gID).add(ctxData);
+                    gameParticipants.computeIfAbsent(gID, k -> new HashMap<>());
+                    gameParticipants.get(gID).put(uName, ctx);
                     ctx.send(ser.toJson(new ServerLoad_GameMessage("Websocket Connected",
                             gData.game(), ChessGame.TeamColor.BLACK)));
 //                } else {
 //                    ctx.send(ser.toJson(new ServerErrorMessage("Black already taken")));
 //                }
             } else { // Observing
-                gameParticipants.computeIfAbsent(gID, k -> new HashSet<>());
-                gameParticipants.get(gID).add(ctxData);
+                gameParticipants.computeIfAbsent(gID, k -> new HashMap<>());
+                gameParticipants.get(gID).put(uName, ctx);
                 ctx.send(ser.toJson(new ServerLoad_GameMessage("Websocket Connected",
                         gData.game(), ChessGame.TeamColor.WHITE)));
                 return; // ensures observer joining does not notify players
             }
-            for(Pair<String, WsMessageContext> ctxPair : gameParticipants.get(gID)){
-                WsMessageContext curCtx = ctxPair.getSecond();
+            gameParticipants.get(gID).forEach((_, curCtx) -> {
                 curCtx.send(ser.toJson(new ServerNotificationMessage(
                         "Player " + gData.gameName() + " has joined the game as " + cmd.getColor())));
-            }
+            });
         } catch (Exception e) {
             ctx.send(ser.toJson(new ServerErrorMessage("Error Connecting")));
         }
@@ -121,30 +119,30 @@ public class WebSocketHandler {
             int gID = cmd.getGameID();
             GameData gData = dataAccess.getGame(gID);
             String uName = dataAccess.getAuth(cmd.getAuthToken()).username();
-            var ctxData = new Pair<>(uName, ctx);
 
             if(gameParticipants.get(gID) == null){
                 ctx.send(ser.toJson(new ServerErrorMessage("game " + gData.gameName() + " does not exist")));
             }
-            if(!gameParticipants.get(gID).contains(ctxData)){
+            if(!gameParticipants.get(gID).get(uName).equals(ctx)){
                 ctx.send(ser.toJson(new ServerErrorMessage("user not in game"))); return;
             }
             if (Objects.equals(gData.whiteUsername(), uName)) { // White
                 dataAccess.updateGame(new GameData(gID, null,
                         gData.blackUsername(), gData.gameName(), gData.game()));
-                gameParticipants.get(gID).remove(ctxData);
+                gameParticipants.get(gID).remove(uName);
             } else if (Objects.equals(gData.blackUsername(), uName)) { // Black
                 dataAccess.updateGame(new GameData(gID, gData.whiteUsername(),
                         null, gData.gameName(), gData.game()));
-                gameParticipants.get(gID).remove(ctxData);
+                gameParticipants.get(gID).remove(uName);
             } else{ // Observer
-                gameParticipants.get(gID).remove(ctxData);
+                gameParticipants.get(gID).remove(uName);
+                return; // Observer leaving shouldn't send notification to all
             }
             ctx.send(ser.toJson(new ServerNotificationMessage("Left Game " + gData.gameName())));
-            for(Pair<String, WsMessageContext> ctxPair : gameParticipants.get(gID)){
-                WsMessageContext curCtx = ctxPair.getSecond();
-                curCtx.send(ser.toJson(new ServerNotificationMessage("Player " + gData.gameName() + " left the game.")));
-            }
+            gameParticipants.get(gID).forEach((_, curCtx) -> {
+                curCtx.send(ser.toJson(new ServerNotificationMessage(
+                        "Player " + gData.gameName() + " has left the game.")));
+            });
         } catch (Exception e) {
             ctx.send(ser.toJson(new ServerErrorMessage("Error Leaving")));
         }
