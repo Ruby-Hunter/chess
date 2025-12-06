@@ -1,5 +1,7 @@
 package ui;
 
+import chess.ChessBoard;
+import chess.ChessGame;
 import com.google.gson.Gson;
 import jakarta.websocket.*;
 import websocket.commands.UserGameCommand;
@@ -27,11 +29,11 @@ public class WebSocketFacade extends Endpoint{
                     case NOTIFICATION -> System.out.println(msg.getMessage());
                     case LOAD_GAME -> {
                         ServerLoad_GameMessage gameMsg = ser.fromJson(message, ServerLoad_GameMessage.class);
-                        System.out.println(BoardPrinter.printBoard(gameMsg.getGame()));
+                        System.out.println(gameMsg.getMessage());
+                        System.out.println(BoardPrinter.printBoard(gameMsg.getGame().getBoard(), gameMsg.getColor()));
                     }
-                    case ERROR -> System.out.println("You had an error");
+                    case ERROR -> System.out.println("Error: " + msg.getMessage());
                 }
-//                System.out.println(msg.getServerMessageType().toString());
             }
         });
     }

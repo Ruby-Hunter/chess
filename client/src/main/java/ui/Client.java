@@ -10,6 +10,7 @@ import jakarta.websocket.DeploymentException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import exception.*;
+import websocket.commands.UserConnectCommand;
 import websocket.commands.UserGameCommand;
 import websocket.commands.UserMoveCommand;
 import websocket.messages.ServerMessage;
@@ -31,7 +32,6 @@ public class Client {
     private final ServerFacade facade;
     private final String uriString;
     private WebSocketFacade wsFacade;
-    private ChessBoard curBoard;
     private AuthData auth;
     private int gameID;
     private long lastTime;
@@ -178,7 +178,7 @@ public class Client {
                     gameID = Integer.parseInt(params[0]);
                     facade.joinGame(new JoinRequest(auth.authToken(), new JoinData(inputColor, gameID)));
                     wsFacade = new WebSocketFacade(uriString);
-                    wsFacade.send(new UserGameCommand(UserGameCommand.CommandType.CONNECT, auth.authToken(), gameID));
+                    wsFacade.send(new UserConnectCommand(auth.authToken(), gameID, color));
                     state = GameState.PLAYING;
                     playingHelp();
                     yield "\nJoined game " + gameID;
@@ -196,6 +196,7 @@ public class Client {
                     yield "\nLogged out";
                 }
                 case "q", "quit" -> {
+                    facade.logout(auth.authToken());
                     res = "quit";
                     yield "Bye!";
                 }
@@ -257,13 +258,10 @@ public class Client {
                     yield "move";
                 }
                 case "s", "show" -> {
-                    if(color == null || color == ChessGame.TeamColor.WHITE)
-                        BoardPrinter.printBoardWhite(curBoard);
-                    else
-                        BoardPrinter.printBoardBlack(curBoard);
-                    yield "show";
+                    yield BoardPrinter.printBoard(color);
                 }
                 case "l", "leave" -> {
+                    wsFacade.send(new UserGameCommand(UserGameCommand.CommandType.LEAVE, auth.authToken(), gameID));
                     color = null;
                     state = GameState.LOGGED_IN;
                     yield "leave";
@@ -293,10 +291,12 @@ public class Client {
             String[] tokens = line.toLowerCase().split(" ");
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
+            if(params.length > 0){
+                return "Too many arguments";
+            }
             return switch (cmd) {
                 case "s", "show" -> {
-
-                    BoardPrinter.printBoardWhite(curBoard);
+                    BoardPrinter.printBoard(ChessGame.TeamColor.WHITE);
                     yield "show";
                 }
                 case "q", "quit" -> {
