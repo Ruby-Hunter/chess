@@ -56,6 +56,11 @@ public class MemoryDataAccess implements DataAccess{
     }
 
     @Override
+    public boolean checkAuth(String username) throws Exception {
+        return false;
+    }
+
+    @Override
     public GameData getGame(Integer gameID) {
         return games.get(gameID);
     }

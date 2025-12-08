@@ -12,6 +12,7 @@ public interface DataAccess {
     UserData getUser(LoginData login) throws Exception;
     UserData checkUser(LoginData login) throws Exception;
     AuthData getAuth(String authToken) throws Exception;
+    boolean checkAuth(String username) throws Exception;
     GameData getGame(Integer gameID) throws Exception;
     void deleteAuth(String authToken) throws Exception;
     HashSet<GameData> listGames() throws Exception;

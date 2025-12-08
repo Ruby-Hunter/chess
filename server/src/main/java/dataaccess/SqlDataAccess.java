@@ -45,6 +45,8 @@ public class SqlDataAccess implements DataAccess{
             );
             """,
 
+            "DROP TABLE IF EXISTS auths;",
+
             """
             CREATE TABLE IF NOT EXISTS auths (
               username varchar(128) NOT NULL,
@@ -157,6 +159,20 @@ public class SqlDataAccess implements DataAccess{
                 }
                 String email = rs.getString("email");
                 return new UserData(login.username(), email, login.password());
+            }
+        } catch(SQLException ex){
+            throw new SQLException(ex.getMessage());
+        } catch(Exception ex){
+            throw new Exception(ex.getMessage());
+        }
+    }
+
+    public boolean checkAuth(String username) throws Exception {
+        try(var conn = DatabaseManager.getConnection()){
+            var statement = conn.prepareStatement("SELECT username FROM auths WHERE username = ?;");
+            statement.setString(1, username);
+            try(ResultSet rs = statement.executeQuery()){
+                return rs.next(); // returns true if already logged in
             }
         } catch(SQLException ex){
             throw new SQLException(ex.getMessage());
