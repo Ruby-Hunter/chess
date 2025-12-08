@@ -12,6 +12,7 @@ import exception.UnauthorizedException;
 import server.websocket.WebSocketHandler;
 import service.UserService;
 
+import java.util.EventListener;
 import java.util.Map;
 
 public class Server {
@@ -24,8 +25,13 @@ public class Server {
         DataAccess dataAccess = new SqlDataAccess();
         userServ = new UserService(dataAccess);
         wsHandler = new WebSocketHandler(dataAccess);
+        wsHandler.kickOutPlayers(); // to make sure there aren't players in the games before it starts
         server = Javalin.create(config -> config.staticFiles.add("web"));
-
+        server.events(evLis -> {
+            evLis.serverStopped(() -> {
+                safeShutdown();
+            });
+        });
         // Register your endpoints and exception handlers here.
         server.delete("db", ctx -> clearData(ctx));
         server.post("user", ctx -> register(ctx));
@@ -178,5 +184,10 @@ public class Server {
 
     public void stop() {
         server.stop();
+    }
+
+    private void safeShutdown(){
+        wsHandler.kickOutPlayers();
+        System.err.println("Server was shut down safely.");
     }
 }

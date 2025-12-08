@@ -1,6 +1,7 @@
 package server.websocket;
 
 import chess.ChessGame;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import datamodel.GameData;
@@ -16,6 +17,7 @@ import websocket.messages.ServerLoad_GameMessage;
 import websocket.messages.ServerMessage;
 import websocket.messages.ServerNotificationMessage;
 
+import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
@@ -110,6 +112,8 @@ public class WebSocketHandler {
                     curCtx.send(ser.toJson(new ServerLoad_GameMessage("Game loaded: ", gData.game(), color)));
                 }
             });
+        } catch (InvalidMoveException ex){
+            ctx.send(ser.toJson(new ServerErrorMessage("Move is invalid")));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -159,5 +163,22 @@ public class WebSocketHandler {
 
     public void closeMessage(){
         System.err.println("Websocket closed");
+    }
+
+    public void kickOutPlayers(){
+        try {
+            var gamesList = dataAccess.listGames();
+            gamesList.forEach(gData -> {
+                try {
+                    dataAccess.updateGame(new GameData(gData.gameID(), null,
+                            null, gData.gameName(), gData.game()));
+                } catch (Exception ex){
+                    System.err.println("Fatal error with kicking out players: " + ex.getMessage());
+                }
+            });
+        } catch (Exception ex){
+            System.err.println("Couldn't get game list: " + ex.getMessage());
+        }
+
     }
 }
