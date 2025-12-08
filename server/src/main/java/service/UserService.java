@@ -12,11 +12,9 @@ import java.util.UUID;
 
 public class UserService {
     private final DataAccess dataAccess;
-    static int curID = 1;
 
     public UserService(DataAccess dataAccess){
         this.dataAccess = dataAccess;
-        curID = 1;
     }
 
     public AuthData register(UserData user) throws Exception{
@@ -69,10 +67,8 @@ public class UserService {
         if(auth == null){ // check if auth exists
             throw new UnauthorizedException("unauthorized");
         }
-        int gameID = generateID();
-        var game = new GameData(gameID, null, null, gameName, new ChessGame());
-        dataAccess.createGame(game);
-        return gameID;
+        var game = new GameData(null, null, null, gameName, new ChessGame());
+        return dataAccess.createGame(game);
     }
 
     public void joinGame(JoinRequest request) throws Exception {
@@ -112,9 +108,5 @@ public class UserService {
 
     private String generateAuthToken(){
         return UUID.randomUUID().toString();
-    }
-
-    private Integer generateID(){
-        return curID++;
     }
 }

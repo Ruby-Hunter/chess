@@ -149,16 +149,16 @@ public class Client {
                         yield "Usage: create <NAME>";
                     }
                     int gameID = facade.createGame(auth.authToken(), params[0]);
-                    System.out.printf("GameID: %d\n", gameID);
-                    yield "\nGame created";
+                    System.out.printf("Game created. GameID: %d\n", gameID);
+                    yield "";
                 }
                 case "li", "list" -> {
                     ListGamesResponse gameList = facade.listGames(auth.authToken());
                     if(gameList.games().isEmpty()){
-                        yield "\nNo games";
+                        yield "No games";
                     }
                     for(GameData game : gameList.games()){
-                        System.out.printf("%d %s WhitePlayer: %s | BlackPlayer: %s\n",
+                        System.out.printf("GameID: %d | Game Name: %s | WhitePlayer: %s | BlackPlayer: %s\n",
                                 game.gameID(), game.gameName(), game.whiteUsername(), game.blackUsername());
                     }
                     yield "";

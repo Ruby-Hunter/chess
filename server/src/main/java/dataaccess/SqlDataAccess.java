@@ -5,7 +5,9 @@ import com.google.gson.Gson;
 import org.mindrot.jbcrypt.BCrypt;
 import datamodel.*;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
 import java.util.HashSet;
 
@@ -54,7 +56,7 @@ public class SqlDataAccess implements DataAccess{
 
             """
             CREATE TABLE IF NOT EXISTS games (
-              gameID int NOT NULL,
+              gameID int NOT NULL AUTO_INCREMENT,
               whiteUsername TEXT,
               blackUsername TEXT,
               gameName varchar(128) NOT NULL,
@@ -116,21 +118,32 @@ public class SqlDataAccess implements DataAccess{
         }
     }
 
+    /* Creates the game and returns the gameID */
     @Override
-    public void createGame(GameData gameData) throws Exception {
+    public int createGame(GameData gameData) throws Exception {
         try(var conn = DatabaseManager.getConnection()){
-            var statement = conn.prepareStatement("INSERT INTO games VALUES (?, ?, ?, ?, ?);");
-            statement.setInt(1, gameData.gameID());
+            var statement = conn.prepareStatement(
+                    "INSERT INTO games VALUES (?, ?, ?, ?, ?);",
+                    Statement.RETURN_GENERATED_KEYS
+            );
+            statement.setNull(1, Types.INTEGER);
             statement.setNull(2, Types.LONGNVARCHAR);
             statement.setNull(3, Types.LONGNVARCHAR);
             statement.setString(4, gameData.gameName());
             statement.setString(5, new Gson().toJson(gameData.game()));
             statement.executeUpdate();
+
+            try(ResultSet keys = statement.getGeneratedKeys()){ // get the gameID
+                if(keys.next()){
+                    return keys.getInt(1);
+                }
+            }
         } catch(SQLException ex){
             throw new SQLException(ex.getMessage());
         } catch(Exception ex){
             throw new Exception(ex.getMessage());
         }
+        return 0;
     }
 
     @Override
@@ -138,7 +151,7 @@ public class SqlDataAccess implements DataAccess{
         try(var conn = DatabaseManager.getConnection()){
             var statement = conn.prepareStatement("SELECT username, email, password FROM users WHERE username = ?;");
             statement.setString(1, login.username());
-            try(var rs = statement.executeQuery()){
+            try(ResultSet rs = statement.executeQuery()){
                 if(!rs.next()){
                     return null;
                 }
@@ -157,7 +170,7 @@ public class SqlDataAccess implements DataAccess{
         try(var conn = DatabaseManager.getConnection()){
             var statement = conn.prepareStatement("SELECT username, email, password FROM users WHERE username = ?;");
             statement.setString(1, login.username());
-            try(var rs = statement.executeQuery()){
+            try(ResultSet rs = statement.executeQuery()){
                 if(!rs.next()){
                     return null;
                 }
@@ -180,7 +193,7 @@ public class SqlDataAccess implements DataAccess{
         try(var conn = DatabaseManager.getConnection()){
             var statement = conn.prepareStatement("SELECT username, authToken FROM auths WHERE authToken = ?;");
             statement.setString(1, authToken);
-            try(var rs = statement.executeQuery()) {
+            try(ResultSet rs = statement.executeQuery()) {
                 if (!rs.next()) {
                     return null;
                 }
@@ -199,7 +212,7 @@ public class SqlDataAccess implements DataAccess{
         try(var conn = DatabaseManager.getConnection()){
             var statement = conn.prepareStatement("SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games WHERE gameID = ?;");
             statement.setInt(1, gameID);
-            try(var rs = statement.executeQuery()) {
+            try(ResultSet rs = statement.executeQuery()) {
                 if (!rs.next()) {
                     return null;
                 }
@@ -235,7 +248,7 @@ public class SqlDataAccess implements DataAccess{
         HashSet<GameData> gameList = new HashSet<>();
         try(var conn = DatabaseManager.getConnection()){
             var statement = conn.prepareStatement("SELECT gameID, whiteUsername, blackUsername, gameName, game FROM games;");
-            try(var rs = statement.executeQuery()) {
+            try(ResultSet rs = statement.executeQuery()) {
                 while (rs.next()) {
                     int gameID = rs.getInt("gameID");
                     String whiteUsername = rs.getString("whiteUsername");
