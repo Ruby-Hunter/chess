@@ -28,9 +28,7 @@ public class Server {
         wsHandler.kickOutPlayers(); // to make sure there aren't players in the games before it starts
         server = Javalin.create(config -> config.staticFiles.add("web"));
         server.events(evLis -> {
-            evLis.serverStopped(() -> {
-                safeShutdown();
-            });
+            evLis.serverStopped(this::safeShutdown);
         });
         // Register your endpoints and exception handlers here.
         server.delete("db", ctx -> clearData(ctx));

@@ -255,7 +255,7 @@ public class Client {
                     ChessPosition newPos = new ChessPosition(newRow, newCol);
                     wsFacade.send(new UserMoveCommand(auth.authToken(), gameID,
                             new ChessMove(oldPos, newPos, null)));
-                    yield "move";
+                    yield "";
                 }
                 case "s", "show" -> {
                     yield BoardPrinter.printBoard(color);

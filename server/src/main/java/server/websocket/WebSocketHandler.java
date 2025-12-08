@@ -113,7 +113,7 @@ public class WebSocketHandler {
                 }
             });
         } catch (InvalidMoveException ex){
-            ctx.send(ser.toJson(new ServerErrorMessage("Move is invalid")));
+            ctx.send(ser.toJson(new ServerErrorMessage(ex.getMessage())));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

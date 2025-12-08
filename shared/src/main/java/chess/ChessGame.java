@@ -93,11 +93,11 @@ public class ChessGame {
         ChessPosition startPos = move.getStartPosition();
         ChessPiece movingPiece = chessBoard.getPiece(startPos);
         if(movingPiece == null){ // If there is no piece, throw an error
-            throw new InvalidMoveException("Move doesn't work");
+            throw new InvalidMoveException("No piece on this tile");
         }
         TeamColor movPieceTeam = movingPiece.getTeamColor();
         if(movPieceTeam != teamTurn){ // Not the right turn
-            throw new InvalidMoveException("Move doesn't work");
+            throw new InvalidMoveException("Not your turn");
         }
         ChessPosition endPos = move.getEndPosition();
         Collection<ChessMove> moves = validMoves(startPos);
