@@ -25,7 +25,7 @@ public class Server {
         DataAccess dataAccess = new SqlDataAccess();
         userServ = new UserService(dataAccess);
         wsHandler = new WebSocketHandler(dataAccess);
-        wsHandler.kickOutPlayers(); // to make sure there aren't players in the games before it starts
+//        wsHandler.kickOutPlayers(); // to make sure there aren't players in the games before it starts
         server = Javalin.create(config -> config.staticFiles.add("web"));
         server.events(evLis -> {
             evLis.serverStopped(this::safeShutdown);
@@ -185,7 +185,7 @@ public class Server {
     }
 
     private void safeShutdown(){
-        wsHandler.kickOutPlayers();
+//        wsHandler.kickOutPlayers();
         System.err.println("Server was shut down safely.");
     }
 }

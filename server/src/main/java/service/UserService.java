@@ -76,9 +76,8 @@ public class UserService {
     }
 
     public void joinGame(JoinRequest request) throws Exception {
-        boolean white = request.joinData().playerColor().toUpperCase().equals("WHITE");
         if(request.authToken() == null  ||  request.joinData().gameID() == null  ||  request.joinData().playerColor() == null
-                ||  !(white || request.joinData().playerColor().toUpperCase().equals("BLACK")) ){
+                ||  !(request.joinData().playerColor().equalsIgnoreCase("WHITE") || request.joinData().playerColor().equalsIgnoreCase("BLACK")) ){
             throw new BadRequestException("bad request");
         }
         var auth = dataAccess.getAuth(request.authToken());
@@ -90,11 +89,11 @@ public class UserService {
         if(gameData == null){
             throw new BadRequestException("bad request");
         }
-        if(Objects.equals(gameData.whiteUsername(), username) || Objects.equals(gameData.blackUsername(), username)){
-            throw new AlreadyTakenException("Player is already in game");
-        }
+//        if(Objects.equals(gameData.whiteUsername(), username) || Objects.equals(gameData.blackUsername(), username)){
+//            throw new AlreadyTakenException("Player is already in game");
+//        }
         GameData newGame;
-        if(white){
+        if(request.joinData().playerColor().equalsIgnoreCase("WHITE")){
             if(gameData.whiteUsername() != null){
                 throw new AlreadyTakenException("already taken");
             } else{

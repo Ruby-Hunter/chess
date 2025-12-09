@@ -45,7 +45,7 @@ public class SqlDataAccess implements DataAccess{
             );
             """,
 
-            "DROP TABLE IF EXISTS auths;",
+//            "DROP TABLE IF EXISTS auths;",
 
             """
             CREATE TABLE IF NOT EXISTS auths (
