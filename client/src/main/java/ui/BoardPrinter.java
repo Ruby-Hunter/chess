@@ -50,25 +50,66 @@ public class BoardPrinter {
                 printMovesWhite(game.getBoard(), moves, pos) : printMovesBlack(game.getBoard(), moves, pos);
     }
 
+    private static void printTile(ChessBoard board, int r, int c){
+        ChessPiece piece = board.getPiece(new ChessPosition(r, c));
+        if(piece == null) {
+            boardString += ((r+c)%2 == 1) ? BG_WHITE : BG_BLACK;
+            boardString += " " + EM_SP + SM_SP; // print empty tile
+        }
+        else {
+            if(piece.getTeamColor().equals(WHITE)){
+                boardString += ((r+c)%2 == 1) ? WHITE_BG_WHITE : WHITE_BG_BLACK;
+            }
+            else{
+                boardString += ((r+c)%2 == 1) ? BLACK_BG_WHITE : BLACK_BG_BLACK;
+            }
+            boardString += " " + piece + SM_SP; // print piece
+        }
+    }
+
+    private static void printMoveTile(HashSet<ChessPosition> validSpots, ChessBoard board, ChessPosition pos, int r, int c){
+        ChessPiece piece = board.getPiece(new ChessPosition(r, c));
+        if(piece == null) {
+            if (validSpots.contains(new ChessPosition(r, c))){
+                boardString += WHITE_BG_YELLOW;
+            }
+            else{
+                boardString += ((r+c)%2 == 1) ? BG_WHITE : BG_BLACK;
+            }
+            boardString += " " + EM_SP + SM_SP; // print empty tile
+            return;
+        }
+        if(piece.getTeamColor().equals(WHITE)) {
+            if (validSpots.contains(new ChessPosition(r, c))){
+                boardString += WHITE_BG_YELLOW;
+            }
+            else if(pos.equals(new ChessPosition(r, c))){
+                boardString += WHITE_BG_GREEN;
+            }
+            else{
+                boardString += ((r + c) % 2 == 1) ? WHITE_BG_WHITE : WHITE_BG_BLACK;
+            }
+        }
+        else{
+            if (validSpots.contains(new ChessPosition(r, c))) {
+                boardString += BLACK_BG_YELLOW;
+            }
+            else if(pos.equals(new ChessPosition(r, c))){
+                boardString += BLACK_BG_GREEN;
+            }
+            else{
+                boardString += ((r + c) % 2 == 1) ? BLACK_BG_WHITE : BLACK_BG_BLACK;
+            }
+        }
+        boardString += " " + piece + SM_SP; // print piece
+    }
+
     public static String printBoardWhite(ChessBoard board){
         boardString = A_ROW;
         for(int r = 8; r >= 1; r--){
             boardString += SIDES + MD_SP + r + MD_SP;
             for(int c = 1; c <= 8; c++){
-                ChessPiece piece = board.getPiece(new ChessPosition(r, c));
-                if(piece == null) {
-                    boardString += ((r+c)%2 == 1) ? BG_WHITE : BG_BLACK;
-                    boardString += " " + EM_SP + SM_SP; // print empty tile
-                }
-                else {
-                    if(piece.getTeamColor().equals(WHITE)){
-                        boardString += ((r+c)%2 == 1) ? WHITE_BG_WHITE : WHITE_BG_BLACK;
-                    }
-                    else{
-                        boardString += ((r+c)%2 == 1) ? BLACK_BG_WHITE : BLACK_BG_BLACK;
-                    }
-                    boardString += " " + piece + SM_SP; // print piece
-                }
+                printTile(board, r, c);
             }
             boardString += SIDES + MD_SP + r + MD_SP + RESET + NL;
         }
@@ -81,20 +122,7 @@ public class BoardPrinter {
         for(int r = 1; r <= 8; r++){
             boardString += SIDES + MD_SP + r + MD_SP;
             for(int c = 8; c >= 1; c--){
-                ChessPiece piece = board.getPiece(new ChessPosition(r, c));
-                if(piece == null) {
-                    boardString += ((r+c)%2 == 1) ? BG_WHITE : BG_BLACK;
-                    boardString += " " + EM_SP + SM_SP; // print empty tile
-                }
-                else {
-                    if(piece.getTeamColor().equals(WHITE)){
-                        boardString += ((r+c)%2 == 1) ? WHITE_BG_WHITE : WHITE_BG_BLACK;
-                    }
-                    else{
-                        boardString += ((r+c)%2 == 1) ? BLACK_BG_WHITE : BLACK_BG_BLACK;
-                    }
-                    boardString += " " + piece + SM_SP; // print piece
-                }
+                printTile(board, r, c);
             }
             boardString += SIDES + MD_SP + r + MD_SP + RESET + NL;
         }
@@ -111,40 +139,7 @@ public class BoardPrinter {
         for(int r = 8; r >= 1; r--){
             boardString += SIDES + MD_SP + r + MD_SP;
             for(int c = 1; c <= 8; c++){
-                ChessPiece piece = board.getPiece(new ChessPosition(r, c));
-                if(piece == null) {
-                    if (validSpots.contains(new ChessPosition(r, c))){
-                        boardString += WHITE_BG_YELLOW;
-                    }
-                    else{
-                        boardString += ((r+c)%2 == 1) ? BG_WHITE : BG_BLACK;
-                    }
-                    boardString += " " + EM_SP + SM_SP; // print empty tile
-                    continue;
-                }
-                if(piece.getTeamColor().equals(WHITE)) {
-                    if (validSpots.contains(new ChessPosition(r, c))){
-                        boardString += WHITE_BG_YELLOW;
-                    }
-                    else if(pos.equals(new ChessPosition(r, c))){
-                        boardString += WHITE_BG_GREEN;
-                    }
-                    else{
-                        boardString += ((r + c) % 2 == 1) ? WHITE_BG_WHITE : WHITE_BG_BLACK;
-                    }
-                }
-                else{
-                    if (validSpots.contains(new ChessPosition(r, c))) {
-                        boardString += BLACK_BG_YELLOW;
-                    }
-                    else if(pos.equals(new ChessPosition(r, c))){
-                        boardString += BLACK_BG_GREEN;
-                    }
-                    else{
-                        boardString += ((r + c) % 2 == 1) ? BLACK_BG_WHITE : BLACK_BG_BLACK;
-                    }
-                }
-                boardString += " " + piece + SM_SP; // print piece
+                printMoveTile(validSpots, board, pos, r, c);
             }
             boardString += SIDES + MD_SP + r + MD_SP + RESET + NL;
         }
@@ -161,38 +156,7 @@ public class BoardPrinter {
         for(int r = 1; r <= 8; r++){
             boardString += SIDES + MD_SP + r + MD_SP;
             for(int c = 8; c >= 1; c--){
-                ChessPiece piece = board.getPiece(new ChessPosition(r, c));
-                if(piece == null) {
-                    if (validSpots.contains(new ChessPosition(r, c)))
-                        boardString += WHITE_BG_YELLOW;
-                    else
-                        boardString += ((r+c)%2 == 1) ? BG_WHITE : BG_BLACK;
-                    boardString += " " + EM_SP + SM_SP; // print empty tile
-                    continue;
-                }
-                if(piece.getTeamColor().equals(WHITE)) {
-                    if (validSpots.contains(new ChessPosition(r, c))){
-                        boardString += WHITE_BG_YELLOW;
-                    }
-                    else if(pos.equals(new ChessPosition(r, c))){
-                        boardString += WHITE_BG_GREEN;
-                    }
-                    else {
-                        boardString += ((r + c) % 2 == 1) ? WHITE_BG_WHITE : WHITE_BG_BLACK;
-                    }
-                }
-                else{
-                    if (validSpots.contains(new ChessPosition(r, c))){
-                        boardString += BLACK_BG_YELLOW;
-                    }
-                    else if(pos.equals(new ChessPosition(r, c))){
-                        boardString += BLACK_BG_GREEN;
-                    }
-                    else{
-                        boardString += ((r + c) % 2 == 1) ? BLACK_BG_WHITE : BLACK_BG_BLACK;
-                    }
-                }
-                boardString += " " + piece + SM_SP; // print piece
+                printMoveTile(validSpots, board, pos, r, c);
             }
             boardString += SIDES + MD_SP + r + MD_SP + RESET + NL;
         }
