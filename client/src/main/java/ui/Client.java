@@ -77,7 +77,6 @@ public class Client {
                 break;
             case OBSERVING:
                 System.out.print("\n[OBSERVING] >>> ");
-//                print_board_white();
                 System.out.println(observingEval(scanner.nextLine()));
                 break;
             default:
@@ -177,14 +176,14 @@ public class Client {
                     }
                     gameID = Integer.parseInt(params[0]);
                     facade.joinGame(new JoinRequest(auth.authToken(), new JoinData(inputColor, gameID)));
-                    wsFacade = new WebSocketFacade(uriString);
+                    wsFacade = new WebSocketFacade(uriString, this);
                     wsFacade.send(new UserConnectCommand(auth.authToken(), gameID, color));
                     state = GameState.PLAYING;
                     playingHelp();
                     yield "\nJoined game " + gameID;
                 }
                 case "o", "observe" -> {
-                    wsFacade = new WebSocketFacade(uriString);
+                    wsFacade = new WebSocketFacade(uriString, this);
                     state = GameState.OBSERVING;
                     observingHelp();
                     yield "\nObserving";
@@ -319,6 +318,14 @@ public class Client {
         } catch (Exception ex){
             return "observing_eval error";
         }
+    }
+
+    public GameState getState(){
+        return state;
+    }
+
+    public ChessGame.TeamColor getColor(){
+        return color;
     }
 
     /*

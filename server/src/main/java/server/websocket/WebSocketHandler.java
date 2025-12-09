@@ -63,9 +63,6 @@ public class WebSocketHandler {
             GameData gData = dataAccess.getGame(gID);
             String uName = dataAccess.getAuth(cmd.getAuthToken()).username();
 
-            if(gameParticipants.get(gID) != null && gameParticipants.get(gID).containsKey(uName)){
-                ctx.send(ser.toJson(new ServerErrorMessage("user already in game")));
-            }
             if (cmd.getColor() == ChessGame.TeamColor.WHITE) { // Join as White
                 dataAccess.updateGame(new GameData(gID, uName,
                         gData.blackUsername(), gData.gameName(), gData.game()));
@@ -100,14 +97,33 @@ public class WebSocketHandler {
         try {
             GameData gData = dataAccess.getGame(cmd.getGameID());
             String uName = dataAccess.getAuth(cmd.getAuthToken()).username();
+            ChessGame game = gData.game();
 
-            gData.game().makeMove(cmd.getMove());
+            game.makeMove(cmd.getMove());
             dataAccess.updateGame(gData);
+            ChessGame.TeamColor curColor = game.getTeamTurn();
+            if(gData.game().isInStalemate(curColor)){
+                gameParticipants.get(cmd.getGameID()).forEach((_, curCtx) -> {
+                    curCtx.send(ser.toJson(new ServerNotificationMessage("Stalemate!")));
+                });
+                return;
+            }
+            if(gData.game().isInCheckmate(curColor)){
+                gameParticipants.get(cmd.getGameID()).forEach((curName, curCtx) -> {
+                    ChessGame.TeamColor color = (Objects.equals(gData.blackUsername(), curName))
+                            ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+                    curCtx.send(ser.toJson(new ServerLoad_GameMessage(
+                            "Checkmate! " + curColor + " loses!", gData.game(), color)));
+                });
+                return;
+            }
             gameParticipants.get(cmd.getGameID()).forEach((curName, curCtx) -> {
                 ChessGame.TeamColor color = (Objects.equals(gData.blackUsername(), curName))
                         ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
                 if(curName.equals(uName)) {
                     curCtx.send(ser.toJson(new ServerLoad_GameMessage("Move valid ", gData.game(), color)));
+                    if(game.isInCheck(curColor))
+                        curCtx.send(ser.toJson(new ServerNotificationMessage("You're in check!")));
                 } else{
                     curCtx.send(ser.toJson(new ServerLoad_GameMessage("Game loaded: ", gData.game(), color)));
                 }

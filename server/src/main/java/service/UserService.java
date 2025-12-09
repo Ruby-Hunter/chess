@@ -8,6 +8,7 @@ import exception.BadRequestException;
 import exception.UnauthorizedException;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.UUID;
 
 public class UserService {
@@ -38,6 +39,9 @@ public class UserService {
         if(userData == null){
             throw new UnauthorizedException("unauthorized");
         }
+//        if(dataAccess.checkAuth(login.username())){
+//            throw new UnauthorizedException("User already logged in");
+//        }
         var authData = new AuthData(login.username(), generateAuthToken());
         dataAccess.createAuth(authData);
         return authData;
@@ -72,31 +76,35 @@ public class UserService {
     }
 
     public void joinGame(JoinRequest request) throws Exception {
+        boolean white = request.joinData().playerColor().equalsIgnoreCase("WHITE");
         if(request.authToken() == null  ||  request.joinData().gameID() == null  ||  request.joinData().playerColor() == null
-                ||  !(request.joinData().playerColor().toUpperCase().equals("WHITE")  ||
-                      request.joinData().playerColor().toUpperCase().equals("BLACK")) ){
+                ||  !(white || request.joinData().playerColor().equalsIgnoreCase("BLACK")) ){
             throw new BadRequestException("bad request");
         }
         var auth = dataAccess.getAuth(request.authToken());
         if(auth == null){ // check if auth exists
             throw new UnauthorizedException("unauthorized");
         }
+        String username = auth.username();
         GameData gameData = dataAccess.getGame(request.joinData().gameID());
         if(gameData == null){
             throw new BadRequestException("bad request");
         }
+        if(Objects.equals(gameData.whiteUsername(), username) || Objects.equals(gameData.blackUsername(), username)){
+            throw new AlreadyTakenException("Player is already in game");
+        }
         GameData newGame;
-        if(request.joinData().playerColor().toUpperCase().equals("WHITE")){
+        if(white){
             if(gameData.whiteUsername() != null){
                 throw new AlreadyTakenException("already taken");
             } else{
-                newGame = new GameData(gameData.gameID(), auth.username(), gameData.blackUsername(), gameData.gameName(), gameData.game());
+                newGame = new GameData(gameData.gameID(), username, gameData.blackUsername(), gameData.gameName(), gameData.game());
             }
         } else {
             if(gameData.blackUsername() != null){
                 throw new AlreadyTakenException("already taken");
             } else{
-                newGame = new GameData(gameData.gameID(), gameData.whiteUsername(), auth.username(), gameData.gameName(), gameData.game());
+                newGame = new GameData(gameData.gameID(), gameData.whiteUsername(), username, gameData.gameName(), gameData.game());
             }
         }
         dataAccess.updateGame(newGame);

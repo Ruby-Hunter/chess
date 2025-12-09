@@ -15,12 +15,14 @@ import java.net.URISyntaxException;
 public class WebSocketFacade extends Endpoint{
     public Session session;
     private final Gson ser;
+    Client client;
 
-    public WebSocketFacade(String uriString) throws Exception {
+    public WebSocketFacade(String uriString, Client client) throws Exception {
         URI uri = new URI(uriString);
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         session = container.connectToServer(this, uri);
         ser = new Gson();
+        this.client = client;
 
         this.session.addMessageHandler(new MessageHandler.Whole<String>() {
             public void onMessage(String message) {
@@ -29,8 +31,12 @@ public class WebSocketFacade extends Endpoint{
                     case NOTIFICATION -> System.out.println(msg.getMessage());
                     case LOAD_GAME -> {
                         ServerLoad_GameMessage gameMsg = ser.fromJson(message, ServerLoad_GameMessage.class);
-                        System.out.println(gameMsg.getMessage());
+                        System.out.println("\n" + gameMsg.getMessage());
                         System.out.println(BoardPrinter.printBoard(gameMsg.getGame().getBoard(), gameMsg.getColor()));
+                        switch(client.getState()){
+                            case PLAYING -> System.out.printf("\n[PLAYING: %s] >>> ", client.getColor());
+                            case OBSERVING -> System.out.print("\n[OBSERVING] >>> ");
+                        }
                     }
                     case ERROR -> System.out.println("Error: " + msg.getMessage());
                 }
