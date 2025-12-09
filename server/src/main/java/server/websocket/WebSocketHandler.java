@@ -122,7 +122,7 @@ public class WebSocketHandler {
             }
 
             if(game.isGameOver()){
-                ctx.send(ser.toJson(new ServerNotificationMessage("Game is already over.")));
+                ctx.send(ser.toJson(new ServerErrorMessage("Game is already over.")));
                 return;
             }
 
@@ -191,7 +191,6 @@ public class WebSocketHandler {
                 gameParticipants.get(gID).remove(uName);
                 return; // Observer leaving shouldn't send notification to all
             }
-            ctx.send(ser.toJson(new ServerNotificationMessage("Left Game " + gData.gameName())));
             gameParticipants.get(gID).forEach((name, curCtx) -> {
                 try {
                     if (!Objects.equals(uName, name)) {
@@ -210,12 +209,20 @@ public class WebSocketHandler {
         int gID = cmd.getGameID();
         GameData gData = dataAccess.getGame(gID);
         ChessGame game = gData.game();
+        if(game.isGameOver()){
+            ctx.send(ser.toJson(new ServerErrorMessage("Game already over, cannot resign")));
+        }
         AuthData aData = dataAccess.getAuth(cmd.getAuthToken());
-            if(aData == null){
-                ctx.send(ser.toJson(new ServerErrorMessage("Bad Authorization")));
-                return;
-            }
-            String uName = aData.username();
+        if(aData == null){
+            ctx.send(ser.toJson(new ServerErrorMessage("Bad Authorization")));
+            return;
+        }
+        String uName = aData.username();
+        if(!(Objects.equals(gData.whiteUsername(), uName) || Objects.equals(gData.blackUsername(), uName))){
+            ctx.send(ser.toJson(new ServerErrorMessage("You cannot resign, you're no player")));
+            return;
+        }
+
         game.resign();
         dataAccess.updateGame(new GameData(gID, gData.whiteUsername(), gData.blackUsername(), gData.gameName(), game));
         gameParticipants.get(gID).forEach((name, curCtx) -> {
