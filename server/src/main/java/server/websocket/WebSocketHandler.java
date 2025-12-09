@@ -132,8 +132,6 @@ public class WebSocketHandler {
                         ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
                 if(curName.equals(uName)) {
                     curCtx.send(ser.toJson(new ServerLoadGameMessage(game, color)));
-//                    curCtx.send(ser.toJson(new ServerNotificationMessage("Player " + uName + " moved " +
-//                            move.getStartPosition() + " to " + move.getEndPosition())));
                 } else{
                     curCtx.send(ser.toJson(new ServerLoadGameMessage(game, color)));
                     curCtx.send(ser.toJson(new ServerNotificationMessage("Player " + uName + " moved " +
@@ -204,22 +202,5 @@ public class WebSocketHandler {
     public void closeMessage(){
 
         System.err.println("Websocket closed");
-    }
-
-    public void kickOutPlayers(){
-        try {
-            var gamesList = dataAccess.listGames();
-            gamesList.forEach(gData -> {
-                try {
-                    dataAccess.updateGame(new GameData(gData.gameID(), null,
-                            null, gData.gameName(), gData.game()));
-                } catch (Exception ex){
-                    System.err.println("Fatal error with kicking out players: " + ex.getMessage());
-                }
-            });
-        } catch (Exception ex){
-            System.err.println("Couldn't get game list: " + ex.getMessage());
-        }
-
     }
 }
