@@ -3,8 +3,10 @@ package ui;
 import com.google.gson.Gson;
 import jakarta.websocket.*;
 import websocket.commands.UserGameCommand;
+import websocket.messages.ServerErrorMessage;
 import websocket.messages.ServerLoadGameMessage;
 import websocket.messages.ServerMessage;
+import websocket.messages.ServerNotificationMessage;
 
 import java.io.IOException;
 import java.net.URI;
@@ -25,17 +27,22 @@ public class WebSocketFacade extends Endpoint{
             public void onMessage(String message) {
                 var msg = ser.fromJson(message, ServerMessage.class);
                 switch(msg.getServerMessageType()){
-                    case NOTIFICATION -> System.out.println(msg.getMessage());
+                    case NOTIFICATION -> {
+                        ServerNotificationMessage notMsg = ser.fromJson(message, ServerNotificationMessage.class);
+                        System.out.println(notMsg.getMessage());
+                    }
                     case LOAD_GAME -> {
                         ServerLoadGameMessage gameMsg = ser.fromJson(message, ServerLoadGameMessage.class);
-                        System.out.println("\n" + gameMsg.getMessage());
                         System.out.println("\n" + BoardPrinter.printBoard(gameMsg.getGame(), gameMsg.getColor()));
                         switch(client.getState()){
                             case PLAYING -> System.out.printf("\n[PLAYING: %s] >>> ", client.getColor());
                             case OBSERVING -> System.out.print("\n[OBSERVING] >>> ");
                         }
                     }
-                    case ERROR -> System.out.println("Error: " + msg.getMessage());
+                    case ERROR -> {
+                        ServerErrorMessage errMsg = ser.fromJson(message, ServerErrorMessage.class);
+                        System.out.println("Error: " + errMsg.getErrorMessage());
+                    }
                 }
             }
         });

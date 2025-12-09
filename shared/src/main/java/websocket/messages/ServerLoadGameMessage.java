@@ -6,8 +6,8 @@ public class ServerLoadGameMessage extends ServerMessage{
     private ChessGame game;
     private ChessGame.TeamColor color;
 
-    public ServerLoadGameMessage(String message, ChessGame game, ChessGame.TeamColor color) {
-        super(ServerMessageType.LOAD_GAME, message);
+    public ServerLoadGameMessage(ChessGame game, ChessGame.TeamColor color) {
+        super(ServerMessageType.LOAD_GAME);
         this.game = game;
         this.color = color;
     }
