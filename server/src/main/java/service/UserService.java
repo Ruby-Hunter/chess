@@ -76,9 +76,9 @@ public class UserService {
     }
 
     public void joinGame(JoinRequest request) throws Exception {
-        boolean white = request.joinData().playerColor().equalsIgnoreCase("WHITE");
+        boolean white = request.joinData().playerColor().toUpperCase().equals("WHITE");
         if(request.authToken() == null  ||  request.joinData().gameID() == null  ||  request.joinData().playerColor() == null
-                ||  !(white || request.joinData().playerColor().equalsIgnoreCase("BLACK")) ){
+                ||  !(white || request.joinData().playerColor().toUpperCase().equals("BLACK")) ){
             throw new BadRequestException("bad request");
         }
         var auth = dataAccess.getAuth(request.authToken());
