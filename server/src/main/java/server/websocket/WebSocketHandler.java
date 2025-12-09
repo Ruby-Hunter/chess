@@ -82,9 +82,11 @@ public class WebSocketHandler {
                         gData.game(), ChessGame.TeamColor.WHITE)));
             }
             gameParticipants.get(gID).forEach((name, curCtx) -> {
+
                 String team = cmd.getColor() != null ? cmd.getColor().toString() : "an observer.";
-                curCtx.send(ser.toJson(new ServerNotificationMessage(
-                        "Player " + uName + " has joined the game as " + team)));
+                if(!Objects.equals(name, uName))
+                    curCtx.send(ser.toJson(new ServerNotificationMessage(
+                            "Player " + uName + " has joined the game as " + team)));
             });
         } catch (Exception e) {
             ctx.send(ser.toJson(new ServerErrorMessage("Error Connecting")));
