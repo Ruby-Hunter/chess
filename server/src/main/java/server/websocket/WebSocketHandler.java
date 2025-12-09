@@ -112,7 +112,7 @@ public class WebSocketHandler {
             String moveString = uName + " moved piece " + move.getStartPosition() + " to " + move.getEndPosition();
 
             if(game.isInStalemate(curColor)){
-                gameParticipants.get(cmd.getGameID()).forEach((_, curCtx) -> {
+                gameParticipants.get(cmd.getGameID()).forEach((name, curCtx) -> {
                     curCtx.send(ser.toJson(new ServerNotificationMessage("Stalemate!")));
                 });
                 return;
@@ -179,7 +179,7 @@ public class WebSocketHandler {
                 return; // Observer leaving shouldn't send notification to all
             }
             ctx.send(ser.toJson(new ServerNotificationMessage("Left Game " + gData.gameName())));
-            gameParticipants.get(gID).forEach((_, curCtx) -> {
+            gameParticipants.get(gID).forEach((name, curCtx) -> {
                 curCtx.send(ser.toJson(new ServerNotificationMessage(
                         "Player " + uName + " has left the game.")));
             });
@@ -195,7 +195,7 @@ public class WebSocketHandler {
         String uName = dataAccess.getAuth(cmd.getAuthToken()).username();
         game.resign();
         dataAccess.updateGame(new GameData(gID, gData.whiteUsername(), gData.blackUsername(), gData.gameName(), game));
-        gameParticipants.get(gID).forEach((_, curCtx) -> {
+        gameParticipants.get(gID).forEach((name, curCtx) -> {
             curCtx.send(ser.toJson(new ServerNotificationMessage(
                     "Player " + uName + " has resigned!")));
         });
