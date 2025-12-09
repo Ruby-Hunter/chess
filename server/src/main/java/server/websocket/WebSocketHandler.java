@@ -84,7 +84,7 @@ public class WebSocketHandler {
                 ctx.send(ser.toJson(new ServerLoad_GameMessage("Websocket Connected",
                         gData.game(), ChessGame.TeamColor.WHITE)));
             }
-            gameParticipants.get(gID).forEach((_, curCtx) -> {
+            gameParticipants.get(gID).forEach((name, curCtx) -> {
                 String team = cmd.getColor() != null ? cmd.getColor().toString() : "an observer.";
                 curCtx.send(ser.toJson(new ServerNotificationMessage(
                         "Player " + uName + " has joined the game as " + team)));
