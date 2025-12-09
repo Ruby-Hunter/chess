@@ -17,12 +17,12 @@ public class WebSocketFacade extends Endpoint{
     private final Gson ser;
     Client client;
 
-    public WebSocketFacade(String uriString, Client client) throws Exception {
+    public WebSocketFacade(String uriString, Client newClient) throws Exception {
         URI uri = new URI(uriString);
         WebSocketContainer container = ContainerProvider.getWebSocketContainer();
         session = container.connectToServer(this, uri);
         ser = new Gson();
-        this.client = client;
+        this.client = newClient;
 
         this.session.addMessageHandler(new MessageHandler.Whole<String>() {
             public void onMessage(String message) {
