@@ -140,7 +140,7 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        gameOver = gameOver || (isInCheck(teamColor) && !hasMoves(teamColor));
+        gameOver = (isInCheck(teamColor) && !hasMoves(teamColor));
         return gameOver;
     }
 
