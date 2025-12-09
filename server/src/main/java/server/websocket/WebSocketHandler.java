@@ -179,8 +179,9 @@ public class WebSocketHandler {
             }
             ctx.send(ser.toJson(new ServerNotificationMessage("Left Game " + gData.gameName())));
             gameParticipants.get(gID).forEach((name, curCtx) -> {
-                curCtx.send(ser.toJson(new ServerNotificationMessage(
-                        "Player " + uName + " has left the game.")));
+                if(!Objects.equals(uName, name))
+                    curCtx.send(ser.toJson(new ServerNotificationMessage(
+                            "Player " + uName + " has left the game.")));
             });
         } catch (Exception e) {
             ctx.send(ser.toJson(new ServerErrorMessage("Error Leaving")));
