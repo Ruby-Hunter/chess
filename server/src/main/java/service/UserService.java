@@ -39,9 +39,7 @@ public class UserService {
         if(userData == null){
             throw new UnauthorizedException("unauthorized");
         }
-//        if(dataAccess.checkAuth(login.username())){
-//            throw new UnauthorizedException("User already logged in");
-//        }
+
         var authData = new AuthData(login.username(), generateAuthToken());
         dataAccess.createAuth(authData);
         return authData;
@@ -89,9 +87,6 @@ public class UserService {
         if(gameData == null){
             throw new BadRequestException("bad request");
         }
-//        if(Objects.equals(gameData.whiteUsername(), username) || Objects.equals(gameData.blackUsername(), username)){
-//            throw new AlreadyTakenException("Player is already in game");
-//        }
         GameData newGame;
         if(request.joinData().playerColor().equalsIgnoreCase("WHITE")){
             if(gameData.whiteUsername() != null){

@@ -236,18 +236,22 @@ public class Client {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "m", "move" -> {
-                    if(params.length != 2)
+                    if(params.length != 2){
                         yield "Usage: move <POS1> <POS2>";
-                    if((params[0].length() != 2) || (params[1].length() != 2))
+                    }
+                    if((params[0].length() != 2) || (params[1].length() != 2)){
                         yield "<POS> must be a <CHAR-INT>. Ex: <A3>";
+                    }
                     int oldCol = params[0].toUpperCase().charAt(0) - 64;
                     int oldRow = params[0].charAt(1) - 48;
                     int newCol = params[1].toUpperCase().charAt(0) - 64;
                     int newRow = params[1].charAt(1) - 48;
-                    if((oldRow < 1 || oldRow > 8) || (oldCol < 1 || oldCol > 8))
+                    if((oldRow < 1 || oldRow > 8) || (oldCol < 1 || oldCol > 8)){
                         yield "<POS1> must be a valid position on chess board";
-                    if((newRow < 1 || newRow > 8) || (newCol < 1 || newCol > 8))
+                    }
+                    if((newRow < 1 || newRow > 8) || (newCol < 1 || newCol > 8)){
                         yield "<POS2> must be a valid position on chess board";
+                    }
                     ChessPosition oldPos = new ChessPosition(oldRow, oldCol);
                     ChessPosition newPos = new ChessPosition(newRow, newCol);
                     wsFacade.send(new UserMoveCommand(auth.authToken(), gameID,
@@ -258,14 +262,17 @@ public class Client {
                     yield BoardPrinter.printBoard(color);
                 }
                 case "hi", "highlight" -> {
-                    if(params.length != 1)
+                    if(params.length != 1){
                         yield "Usage: highlight <POS>";
-                    if((params[0].length() != 2))
+                    }
+                    if((params[0].length() != 2)){
                         yield "<POS> must be a <CHAR-INT>. Ex: <A3>";
+                    }
                     int col = params[0].toUpperCase().charAt(0) - 64;
                     int row = params[0].charAt(1) - 48;
-                    if((row < 1 || row > 8) || (col < 1 || col > 8))
+                    if((row < 1 || row > 8) || (col < 1 || col > 8)){
                         yield "<POS1> must be a valid position on chess board";
+                    }
                     yield BoardPrinter.printMoves(color, new ChessPosition(row, col));
                 }
                 case "l", "leave" -> {

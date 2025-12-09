@@ -167,20 +167,6 @@ public class SqlDataAccess implements DataAccess{
         }
     }
 
-    public boolean checkAuth(String username) throws Exception {
-        try(var conn = DatabaseManager.getConnection()){
-            var statement = conn.prepareStatement("SELECT username FROM auths WHERE username = ?;");
-            statement.setString(1, username);
-            try(ResultSet rs = statement.executeQuery()){
-                return rs.next(); // returns true if already logged in
-            }
-        } catch(SQLException ex){
-            throw new SQLException(ex.getMessage());
-        } catch(Exception ex){
-            throw new Exception(ex.getMessage());
-        }
-    }
-
     @Override
     public UserData checkUser(LoginData login) throws Exception { // returns UserData if login matches it, else returns nulll
         try(var conn = DatabaseManager.getConnection()){

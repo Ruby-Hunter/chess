@@ -1,16 +1,13 @@
 package ui;
 
-import chess.ChessBoard;
-import chess.ChessGame;
 import com.google.gson.Gson;
 import jakarta.websocket.*;
 import websocket.commands.UserGameCommand;
-import websocket.messages.ServerLoad_GameMessage;
+import websocket.messages.ServerLoadGameMessage;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 
 public class WebSocketFacade extends Endpoint{
     public Session session;
@@ -30,7 +27,7 @@ public class WebSocketFacade extends Endpoint{
                 switch(msg.getServerMessageType()){
                     case NOTIFICATION -> System.out.println(msg.getMessage());
                     case LOAD_GAME -> {
-                        ServerLoad_GameMessage gameMsg = ser.fromJson(message, ServerLoad_GameMessage.class);
+                        ServerLoadGameMessage gameMsg = ser.fromJson(message, ServerLoadGameMessage.class);
                         System.out.println("\n" + gameMsg.getMessage());
                         System.out.println("\n" + BoardPrinter.printBoard(gameMsg.getGame(), gameMsg.getColor()));
                         switch(client.getState()){

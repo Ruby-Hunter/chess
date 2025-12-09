@@ -11,12 +11,10 @@ import websocket.commands.UserConnectCommand;
 import websocket.commands.UserGameCommand;
 import websocket.commands.UserMoveCommand;
 import websocket.messages.ServerErrorMessage;
-import websocket.messages.ServerLoad_GameMessage;
-import websocket.messages.ServerMessage;
+import websocket.messages.ServerLoadGameMessage;
 import websocket.messages.ServerNotificationMessage;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Objects;
 
 
@@ -65,27 +63,27 @@ public class WebSocketHandler {
                         gData.blackUsername(), gData.gameName(), gData.game()));
                 gameParticipants.computeIfAbsent(gID, k -> new HashMap<>());
                 gameParticipants.get(gID).put(uName, ctx);
-                ctx.send(ser.toJson(new ServerLoad_GameMessage(null,
+                ctx.send(ser.toJson(new ServerLoadGameMessage(null,
                         gData.game(), ChessGame.TeamColor.WHITE)));
             } else if (cmd.getColor() == ChessGame.TeamColor.BLACK) { // Join as black
                 dataAccess.updateGame(new GameData(gID, gData.whiteUsername(),
                         uName, gData.gameName(), gData.game()));
                 gameParticipants.computeIfAbsent(gID, k -> new HashMap<>());
                 gameParticipants.get(gID).put(uName, ctx);
-                ctx.send(ser.toJson(new ServerLoad_GameMessage(null,
+                ctx.send(ser.toJson(new ServerLoadGameMessage(null,
                         gData.game(), ChessGame.TeamColor.BLACK)));
             } else { // Observing
                 gameParticipants.computeIfAbsent(gID, k -> new HashMap<>());
                 gameParticipants.get(gID).put(uName, ctx);
-                ctx.send(ser.toJson(new ServerLoad_GameMessage(null,
+                ctx.send(ser.toJson(new ServerLoadGameMessage(null,
                         gData.game(), ChessGame.TeamColor.WHITE)));
             }
             gameParticipants.get(gID).forEach((name, curCtx) -> {
 
                 String team = cmd.getColor() != null ? cmd.getColor().toString() : "an observer.";
-                if(!Objects.equals(name, uName))
-                    curCtx.send(ser.toJson(new ServerNotificationMessage(
-                            "Player " + uName + " has joined the game as " + team)));
+                if(!Objects.equals(name, uName)){
+                    curCtx.send(ser.toJson(new ServerNotificationMessage("Player " + uName + " has joined the game as " + team)));
+                }
             });
         } catch (Exception e) {
             ctx.send(ser.toJson(new ServerErrorMessage("Error Connecting")));
@@ -119,7 +117,7 @@ public class WebSocketHandler {
                 gameParticipants.get(cmd.getGameID()).forEach((curName, curCtx) -> {
                     ChessGame.TeamColor color = (Objects.equals(gData.blackUsername(), curName))
                             ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
-                    curCtx.send(ser.toJson(new ServerLoad_GameMessage(
+                    curCtx.send(ser.toJson(new ServerLoadGameMessage(
                             "Checkmate! " + enemyName + " loses!", game, color)));
                 });
                 return;
@@ -128,7 +126,7 @@ public class WebSocketHandler {
                 gameParticipants.get(cmd.getGameID()).forEach((curName, curCtx) -> {
                     ChessGame.TeamColor color = (Objects.equals(gData.blackUsername(), curName))
                             ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
-                    curCtx.send(ser.toJson(new ServerLoad_GameMessage(
+                    curCtx.send(ser.toJson(new ServerLoadGameMessage(
                             "Player " + uName + " moved " + move.getStartPosition() + " to " +
                                     move.getEndPosition() + "\nPlayer " + enemyName + " is in check!", game, color)));
                 });
@@ -138,10 +136,10 @@ public class WebSocketHandler {
                 ChessGame.TeamColor color = (Objects.equals(gData.blackUsername(), curName))
                         ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
                 if(curName.equals(uName)) {
-                    curCtx.send(ser.toJson(new ServerLoad_GameMessage("Player " + uName + " moved " +
+                    curCtx.send(ser.toJson(new ServerLoadGameMessage("Player " + uName + " moved " +
                             move.getStartPosition() + " to " + move.getEndPosition(), game, color)));
                 } else{
-                    curCtx.send(ser.toJson(new ServerLoad_GameMessage("Player " + uName + " moved " +
+                    curCtx.send(ser.toJson(new ServerLoadGameMessage("Player " + uName + " moved " +
                             move.getStartPosition() + " to " + move.getEndPosition(), game, color)));
                 }
             });
@@ -179,9 +177,9 @@ public class WebSocketHandler {
             }
             ctx.send(ser.toJson(new ServerNotificationMessage("Left Game " + gData.gameName())));
             gameParticipants.get(gID).forEach((name, curCtx) -> {
-                if(!Objects.equals(uName, name))
-                    curCtx.send(ser.toJson(new ServerNotificationMessage(
-                            "Player " + uName + " has left the game.")));
+                if(!Objects.equals(uName, name)){
+                    curCtx.send(ser.toJson(new ServerNotificationMessage( "Player " + uName + " has left the game.")));
+                }
             });
         } catch (Exception e) {
             ctx.send(ser.toJson(new ServerErrorMessage("Error Leaving")));

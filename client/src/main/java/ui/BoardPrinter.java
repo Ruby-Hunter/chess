@@ -61,10 +61,12 @@ public class BoardPrinter {
                     boardString += " " + EM_SP + SM_SP; // print empty tile
                 }
                 else {
-                    if(piece.getTeamColor().equals(WHITE))
+                    if(piece.getTeamColor().equals(WHITE)){
                         boardString += ((r+c)%2 == 1) ? WHITE_BG_WHITE : WHITE_BG_BLACK;
-                    else
+                    }
+                    else{
                         boardString += ((r+c)%2 == 1) ? BLACK_BG_WHITE : BLACK_BG_BLACK;
+                    }
                     boardString += " " + piece + SM_SP; // print piece
                 }
             }
@@ -85,10 +87,12 @@ public class BoardPrinter {
                     boardString += " " + EM_SP + SM_SP; // print empty tile
                 }
                 else {
-                    if(piece.getTeamColor().equals(WHITE))
+                    if(piece.getTeamColor().equals(WHITE)){
                         boardString += ((r+c)%2 == 1) ? WHITE_BG_WHITE : WHITE_BG_BLACK;
-                    else
+                    }
+                    else{
                         boardString += ((r+c)%2 == 1) ? BLACK_BG_WHITE : BLACK_BG_BLACK;
+                    }
                     boardString += " " + piece + SM_SP; // print piece
                 }
             }
@@ -109,31 +113,38 @@ public class BoardPrinter {
             for(int c = 1; c <= 8; c++){
                 ChessPiece piece = board.getPiece(new ChessPosition(r, c));
                 if(piece == null) {
-                    if (validSpots.contains(new ChessPosition(r, c)))
+                    if (validSpots.contains(new ChessPosition(r, c))){
                         boardString += WHITE_BG_YELLOW;
-                    else
-                        boardString += ((r+c)%2 == 1) ? BG_WHITE : BG_BLACK;
-                    boardString += " " + EM_SP + SM_SP; // print empty tile
-                }
-                else {
-                    if(piece.getTeamColor().equals(WHITE)) {
-                        if (validSpots.contains(new ChessPosition(r, c)))
-                            boardString += WHITE_BG_YELLOW;
-                        else if(pos.equals(new ChessPosition(r, c)))
-                            boardString += WHITE_BG_GREEN;
-                        else
-                            boardString += ((r + c) % 2 == 1) ? WHITE_BG_WHITE : WHITE_BG_BLACK;
                     }
                     else{
-                        if (validSpots.contains(new ChessPosition(r, c)))
-                            boardString += BLACK_BG_YELLOW;
-                        else if(pos.equals(new ChessPosition(r, c)))
-                            boardString += BLACK_BG_GREEN;
-                        else
-                            boardString += ((r + c) % 2 == 1) ? BLACK_BG_WHITE : BLACK_BG_BLACK;
+                        boardString += ((r+c)%2 == 1) ? BG_WHITE : BG_BLACK;
                     }
-                    boardString += " " + piece + SM_SP; // print piece
+                    boardString += " " + EM_SP + SM_SP; // print empty tile
+                    continue;
                 }
+                if(piece.getTeamColor().equals(WHITE)) {
+                    if (validSpots.contains(new ChessPosition(r, c))){
+                        boardString += WHITE_BG_YELLOW;
+                    }
+                    else if(pos.equals(new ChessPosition(r, c))){
+                        boardString += WHITE_BG_GREEN;
+                    }
+                    else{
+                        boardString += ((r + c) % 2 == 1) ? WHITE_BG_WHITE : WHITE_BG_BLACK;
+                    }
+                }
+                else{
+                    if (validSpots.contains(new ChessPosition(r, c))) {
+                        boardString += BLACK_BG_YELLOW;
+                    }
+                    else if(pos.equals(new ChessPosition(r, c))){
+                        boardString += BLACK_BG_GREEN;
+                    }
+                    else{
+                        boardString += ((r + c) % 2 == 1) ? BLACK_BG_WHITE : BLACK_BG_BLACK;
+                    }
+                }
+                boardString += " " + piece + SM_SP; // print piece
             }
             boardString += SIDES + MD_SP + r + MD_SP + RESET + NL;
         }
@@ -157,26 +168,31 @@ public class BoardPrinter {
                     else
                         boardString += ((r+c)%2 == 1) ? BG_WHITE : BG_BLACK;
                     boardString += " " + EM_SP + SM_SP; // print empty tile
+                    continue;
                 }
-                else {
-                    if(piece.getTeamColor().equals(WHITE)) {
-                        if (validSpots.contains(new ChessPosition(r, c)))
-                            boardString += WHITE_BG_YELLOW;
-                        else if(pos.equals(new ChessPosition(r, c)))
-                            boardString += WHITE_BG_GREEN;
-                        else
-                            boardString += ((r + c) % 2 == 1) ? WHITE_BG_WHITE : WHITE_BG_BLACK;
+                if(piece.getTeamColor().equals(WHITE)) {
+                    if (validSpots.contains(new ChessPosition(r, c))){
+                        boardString += WHITE_BG_YELLOW;
+                    }
+                    else if(pos.equals(new ChessPosition(r, c))){
+                        boardString += WHITE_BG_GREEN;
+                    }
+                    else {
+                        boardString += ((r + c) % 2 == 1) ? WHITE_BG_WHITE : WHITE_BG_BLACK;
+                    }
+                }
+                else{
+                    if (validSpots.contains(new ChessPosition(r, c))){
+                        boardString += BLACK_BG_YELLOW;
+                    }
+                    else if(pos.equals(new ChessPosition(r, c))){
+                        boardString += BLACK_BG_GREEN;
                     }
                     else{
-                        if (validSpots.contains(new ChessPosition(r, c)))
-                            boardString += BLACK_BG_YELLOW;
-                        else if(pos.equals(new ChessPosition(r, c)))
-                            boardString += BLACK_BG_GREEN;
-                        else
-                            boardString += ((r + c) % 2 == 1) ? BLACK_BG_WHITE : BLACK_BG_BLACK;
+                        boardString += ((r + c) % 2 == 1) ? BLACK_BG_WHITE : BLACK_BG_BLACK;
                     }
-                    boardString += " " + piece + SM_SP; // print piece
                 }
+                boardString += " " + piece + SM_SP; // print piece
             }
             boardString += SIDES + MD_SP + r + MD_SP + RESET + NL;
         }
