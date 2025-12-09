@@ -21,7 +21,7 @@ import java.util.Objects;
 public class WebSocketHandler {
     Gson ser;
     DataAccess dataAccess;
-    HashMap<Integer, HashMap<String, WsMessageContext>> gameParticipants;
+    static HashMap<Integer, HashMap<String, WsMessageContext>> gameParticipants;
 
     public WebSocketHandler(DataAccess access){
         ser = new Gson();
@@ -61,25 +61,21 @@ public class WebSocketHandler {
             if (cmd.getColor() == ChessGame.TeamColor.WHITE) { // Join as White
                 dataAccess.updateGame(new GameData(gID, uName,
                         gData.blackUsername(), gData.gameName(), gData.game()));
-                gameParticipants.computeIfAbsent(gID, k -> new HashMap<>());
-                gameParticipants.get(gID).put(uName, ctx);
                 ctx.send(ser.toJson(new ServerLoadGameMessage(null,
                         gData.game(), ChessGame.TeamColor.WHITE)));
             } else if (cmd.getColor() == ChessGame.TeamColor.BLACK) { // Join as black
                 dataAccess.updateGame(new GameData(gID, gData.whiteUsername(),
                         uName, gData.gameName(), gData.game()));
-                gameParticipants.computeIfAbsent(gID, k -> new HashMap<>());
-                gameParticipants.get(gID).put(uName, ctx);
                 ctx.send(ser.toJson(new ServerLoadGameMessage(null,
                         gData.game(), ChessGame.TeamColor.BLACK)));
             } else { // Observing
-                gameParticipants.computeIfAbsent(gID, k -> new HashMap<>());
-                gameParticipants.get(gID).put(uName, ctx);
                 ctx.send(ser.toJson(new ServerLoadGameMessage(null,
                         gData.game(), ChessGame.TeamColor.WHITE)));
             }
-            gameParticipants.get(gID).forEach((name, curCtx) -> {
-
+            gameParticipants.computeIfAbsent(gID, k -> new HashMap<>()).forEach((name, curCtx) -> {
+                if(curCtx == null || !curCtx.session.isOpen()){
+                    return;
+                }
                 String team = cmd.getColor() != null ? cmd.getColor().toString() : "an observer.";
                 if(!Objects.equals(name, uName)){
                     curCtx.send(ser.toJson(new ServerNotificationMessage("Player " + uName + " has joined the game as " + team)));
@@ -205,6 +201,7 @@ public class WebSocketHandler {
     }
 
     public void closeMessage(){
+
         System.err.println("Websocket closed");
     }
 
