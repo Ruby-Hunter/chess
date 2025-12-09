@@ -4,6 +4,9 @@ import chess.ChessGame;
 
 public class UserConnectCommand extends UserGameCommand{
     ChessGame.TeamColor color;
+    public UserConnectCommand() {
+        super(CommandType.CONNECT, null, null);
+    }
     public UserConnectCommand(String authToken, Integer gameID, ChessGame.TeamColor color) {
         super(CommandType.CONNECT, authToken, gameID);
         this.color = color;
