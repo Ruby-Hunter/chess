@@ -160,8 +160,9 @@ public class WebSocketHandler {
                 ctx.send(ser.toJson(new ServerErrorMessage("game " + gData.gameName() + " does not exist")));
                 return;
             }
-            if(!gameParticipants.get(gID).get(uName).equals(ctx)){
-                ctx.send(ser.toJson(new ServerErrorMessage("user not in game"))); return;
+            if (!gameParticipants.get(gID).get(uName).equals(ctx)) {
+                ctx.send(ser.toJson(new ServerErrorMessage("user not in game")));
+                return;
             }
             if (Objects.equals(gData.whiteUsername(), uName)) { // White
                 dataAccess.updateGame(new GameData(gID, null,
