@@ -11,11 +11,13 @@ import java.util.*;
 public class ChessGame {
     private TeamColor teamTurn;
     private ChessBoard chessBoard;
+    private boolean gameOver;
 
     public ChessGame() {
         ChessBoard n = new ChessBoard();
         n.resetBoard();
         setBoard(n);
+        gameOver = false;
     }
 
     /**
@@ -168,6 +170,10 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return chessBoard;
+    }
+
+    public boolean isGameOver(){
+        return gameOver;
     }
 
     public boolean hasMoves(TeamColor color){

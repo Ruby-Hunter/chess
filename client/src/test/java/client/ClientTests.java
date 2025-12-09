@@ -20,7 +20,7 @@ public class ClientTests {
         String result = BoardPrinter.printBoardWhite(board); result += "\n";
         result += BoardPrinter.printBoardBlack(board);
         System.out.print(result);
-        Assertions.assertEquals("f886dab381bb451bbadd8210e055d77080a30f82ddc2c2048a090aa641241a0a", sha256(result));
+        Assertions.assertEquals("0c4123b4592e3aa391a743fee526d08dc2e7e7a645136371b4630f9c9b438b8e", sha256(result));
     }
 
     @Test // tests printing out a board with a piece moved

@@ -32,7 +32,7 @@ public class WebSocketFacade extends Endpoint{
                     case LOAD_GAME -> {
                         ServerLoad_GameMessage gameMsg = ser.fromJson(message, ServerLoad_GameMessage.class);
                         System.out.println("\n" + gameMsg.getMessage());
-                        System.out.println(BoardPrinter.printBoard(gameMsg.getGame().getBoard(), gameMsg.getColor()));
+                        System.out.println(BoardPrinter.printBoard(gameMsg.getGame(), gameMsg.getColor()));
                         switch(client.getState()){
                             case PLAYING -> System.out.printf("\n[PLAYING: %s] >>> ", client.getColor());
                             case OBSERVING -> System.out.print("\n[OBSERVING] >>> ");
