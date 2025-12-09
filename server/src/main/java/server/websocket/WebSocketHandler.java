@@ -15,7 +15,6 @@ import websocket.messages.ServerLoad_GameMessage;
 import websocket.messages.ServerMessage;
 import websocket.messages.ServerNotificationMessage;
 
-import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
