@@ -66,19 +66,19 @@ public class WebSocketHandler {
                         gData.blackUsername(), gData.gameName(), gData.game()));
                 gameParticipants.computeIfAbsent(gID, k -> new HashMap<>());
                 gameParticipants.get(gID).put(uName, ctx);
-                ctx.send(ser.toJson(new ServerLoad_GameMessage("Websocket Connected",
+                ctx.send(ser.toJson(new ServerLoad_GameMessage(null,
                         gData.game(), ChessGame.TeamColor.WHITE)));
             } else if (cmd.getColor() == ChessGame.TeamColor.BLACK) { // Join as black
                 dataAccess.updateGame(new GameData(gID, gData.whiteUsername(),
                         uName, gData.gameName(), gData.game()));
                 gameParticipants.computeIfAbsent(gID, k -> new HashMap<>());
                 gameParticipants.get(gID).put(uName, ctx);
-                ctx.send(ser.toJson(new ServerLoad_GameMessage("Websocket Connected",
+                ctx.send(ser.toJson(new ServerLoad_GameMessage(null,
                         gData.game(), ChessGame.TeamColor.BLACK)));
             } else { // Observing
                 gameParticipants.computeIfAbsent(gID, k -> new HashMap<>());
                 gameParticipants.get(gID).put(uName, ctx);
-                ctx.send(ser.toJson(new ServerLoad_GameMessage("Websocket Connected",
+                ctx.send(ser.toJson(new ServerLoad_GameMessage(null,
                         gData.game(), ChessGame.TeamColor.WHITE)));
             }
             gameParticipants.get(gID).forEach((name, curCtx) -> {
