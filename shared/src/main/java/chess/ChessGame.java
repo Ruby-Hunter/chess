@@ -154,7 +154,8 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        return (!isInCheck(teamColor)) && (!hasMoves(teamColor));
+        gameOver = (!isInCheck(teamColor)) && (!hasMoves(teamColor));
+        return gameOver;
     }
 
     /**

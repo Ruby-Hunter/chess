@@ -14,6 +14,7 @@ import websocket.messages.ServerErrorMessage;
 import websocket.messages.ServerLoadGameMessage;
 import websocket.messages.ServerNotificationMessage;
 
+import java.nio.channels.ClosedChannelException;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -56,7 +57,12 @@ public class WebSocketHandler {
         try {
             int gID = cmd.getGameID();
             GameData gData = dataAccess.getGame(gID);
-            String uName = dataAccess.getAuth(cmd.getAuthToken()).username();
+            AuthData aData = dataAccess.getAuth(cmd.getAuthToken());
+            if(aData == null){
+                ctx.send(ser.toJson(new ServerErrorMessage("Bad Authorization")));
+                return;
+            }
+            String uName = aData.username();
 
             if (cmd.getColor() == ChessGame.TeamColor.WHITE) { // Join as White
                 dataAccess.updateGame(new GameData(gID, uName,
@@ -78,64 +84,73 @@ public class WebSocketHandler {
             gameParticipants.get(gID).forEach((name, curCtx) -> {
                 String team = cmd.getColor() != null ? cmd.getColor().toString() : "an observer.";
                 if(!Objects.equals(name, uName)){
-                    curCtx.send(ser.toJson(new ServerNotificationMessage("Player " + uName + " has joined the game as " + team)));
+                    try{
+                        curCtx.send(ser.toJson(new ServerNotificationMessage("Player " + uName + " has joined the game as " + team)));
+                    } catch (Exception e){
+                        System.err.println("Connection closed");
+                    }
                 }
             });
         } catch (Exception e) {
-            ctx.send(ser.toJson(new ServerErrorMessage("Error Connecting")));
+            ctx.send(ser.toJson(new ServerErrorMessage("Error Connecting: " + e.getMessage())));
         }
     }
 
     private void handleMove(WsMessageContext ctx, UserMoveCommand cmd){
         try {
             GameData gData = dataAccess.getGame(cmd.getGameID());
-            String uName = dataAccess.getAuth(cmd.getAuthToken()).username();
+            AuthData aData = dataAccess.getAuth(cmd.getAuthToken());
+            if(aData == null){
+                ctx.send(ser.toJson(new ServerErrorMessage("Bad Authorization")));
+                return;
+            }
+            String uName = aData.username();
             ChessGame game = gData.game();
+            ChessGame.TeamColor inputColor;
+            if(Objects.equals(gData.whiteUsername(), uName)){
+                inputColor = ChessGame.TeamColor.WHITE;
+            } else if(Objects.equals(gData.blackUsername(), uName)){
+                inputColor = ChessGame.TeamColor.BLACK;
+            } else {
+                ctx.send(ser.toJson(new ServerErrorMessage("You cannot make moves, you're no player")));
+                return;
+            }
             ChessMove move = cmd.getMove();
+            if(inputColor != game.getBoard().getPiece(move.getStartPosition()).getTeamColor()){
+                ctx.send(ser.toJson(new ServerErrorMessage("Not your turn")));
+                return;
+            }
 
             if(game.isGameOver()){
                 ctx.send(ser.toJson(new ServerNotificationMessage("Game is already over.")));
                 return;
             }
+
             game.makeMove(move);
             dataAccess.updateGame(gData);
-            ChessGame.TeamColor curColor = game.getTeamTurn();
-            String enemyName = (curColor == ChessGame.TeamColor.WHITE) ? gData.whiteUsername() : gData.blackUsername();;
+            ChessGame.TeamColor enemyColor = game.getTeamTurn();
+            String enemyName = (enemyColor == ChessGame.TeamColor.WHITE) ? gData.whiteUsername() : gData.blackUsername();;
 
-            if(game.isInStalemate(curColor)){
-                gameParticipants.get(cmd.getGameID()).forEach((name, curCtx) -> {
-                    curCtx.send(ser.toJson(new ServerNotificationMessage("Stalemate!")));
-                });
-                return;
-            }
-            if(game.isInCheckmate(curColor)){
-                gameParticipants.get(cmd.getGameID()).forEach((curName, curCtx) -> {
-                    ChessGame.TeamColor color = (Objects.equals(gData.blackUsername(), curName))
-                            ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
-                    curCtx.send(ser.toJson(new ServerLoadGameMessage(game, color)));
-                    curCtx.send(ser.toJson(new ServerNotificationMessage("Checkmate! " + enemyName + " loses!")));
-                });
-                return;
-            }
-            if(game.isInCheck(curColor)){
-                gameParticipants.get(cmd.getGameID()).forEach((curName, curCtx) -> {
-                    ChessGame.TeamColor color = (Objects.equals(gData.blackUsername(), curName))
-                            ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
-                    curCtx.send(ser.toJson(new ServerLoadGameMessage(game, color)));
-                    curCtx.send(ser.toJson(new ServerNotificationMessage("Player " + uName + " moved " +
-                            move.getStartPosition() + " to " + move.getEndPosition() + "\nPlayer " + enemyName + " is in check!")));
-                });
-                return;
-            }
             gameParticipants.get(cmd.getGameID()).forEach((curName, curCtx) -> { // normal move
                 ChessGame.TeamColor color = (Objects.equals(gData.blackUsername(), curName))
                         ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
-                if(curName.equals(uName)) {
-                    curCtx.send(ser.toJson(new ServerLoadGameMessage(game, color)));
-                } else{
-                    curCtx.send(ser.toJson(new ServerLoadGameMessage(game, color)));
-                    curCtx.send(ser.toJson(new ServerNotificationMessage("Player " + uName + " moved " +
-                            move.getStartPosition() + " to " + move.getEndPosition())));
+                try {
+                    if (curName.equals(uName)) {
+                        curCtx.send(ser.toJson(new ServerLoadGameMessage(game, color)));
+                    } else {
+                        curCtx.send(ser.toJson(new ServerLoadGameMessage(game, color)));
+                        curCtx.send(ser.toJson(new ServerNotificationMessage("Player " + uName + " moved " +
+                                move.getStartPosition() + " to " + move.getEndPosition())));
+                    }
+                    if(game.isInCheckmate(enemyColor)){
+                        curCtx.send(ser.toJson(new ServerNotificationMessage("Checkmate! " + enemyName + " loses!")));
+                    } else if(game.isInCheck(enemyColor)){
+                        curCtx.send(ser.toJson(new ServerNotificationMessage("Player " + enemyName + " is in check!")));
+                    } else if(game.isInStalemate(enemyColor)){
+                        curCtx.send(ser.toJson(new ServerNotificationMessage("Stalemate!")));
+                    }
+                } catch (Exception e){
+                    System.err.println("Connection closed");
                 }
             });
         } catch (InvalidMoveException ex){
@@ -149,7 +164,12 @@ public class WebSocketHandler {
         try {
             int gID = cmd.getGameID();
             GameData gData = dataAccess.getGame(gID);
-            String uName = dataAccess.getAuth(cmd.getAuthToken()).username();
+            AuthData aData = dataAccess.getAuth(cmd.getAuthToken());
+            if(aData == null){
+                ctx.send(ser.toJson(new ServerErrorMessage("Bad Authorization")));
+                return;
+            }
+            String uName = aData.username();
 
             if(gameParticipants.get(gID) == null){
                 ctx.send(ser.toJson(new ServerErrorMessage("game " + gData.gameName() + " does not exist")));
@@ -173,8 +193,12 @@ public class WebSocketHandler {
             }
             ctx.send(ser.toJson(new ServerNotificationMessage("Left Game " + gData.gameName())));
             gameParticipants.get(gID).forEach((name, curCtx) -> {
-                if(!Objects.equals(uName, name)){
-                    curCtx.send(ser.toJson(new ServerNotificationMessage( "Player " + uName + " has left the game.")));
+                try {
+                    if (!Objects.equals(uName, name)) {
+                        curCtx.send(ser.toJson(new ServerNotificationMessage("Player " + uName + " has left the game.")));
+                    }
+                } catch (Exception e){
+                    System.err.println("Connection closed");
                 }
             });
         } catch (Exception e) {
@@ -186,12 +210,21 @@ public class WebSocketHandler {
         int gID = cmd.getGameID();
         GameData gData = dataAccess.getGame(gID);
         ChessGame game = gData.game();
-        String uName = dataAccess.getAuth(cmd.getAuthToken()).username();
+        AuthData aData = dataAccess.getAuth(cmd.getAuthToken());
+            if(aData == null){
+                ctx.send(ser.toJson(new ServerErrorMessage("Bad Authorization")));
+                return;
+            }
+            String uName = aData.username();
         game.resign();
         dataAccess.updateGame(new GameData(gID, gData.whiteUsername(), gData.blackUsername(), gData.gameName(), game));
         gameParticipants.get(gID).forEach((name, curCtx) -> {
-            curCtx.send(ser.toJson(new ServerNotificationMessage(
-                    "Player " + uName + " has resigned!")));
+            try{
+                curCtx.send(ser.toJson(new ServerNotificationMessage(
+                        "Player " + uName + " has resigned!")));
+            } catch (Exception e){
+                System.err.println("Connection closed");
+            }
         });
     }
 
