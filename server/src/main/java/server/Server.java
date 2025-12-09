@@ -44,7 +44,7 @@ public class Server {
                 System.err.println("Websocket connected");
             });
             ws.onMessage(ctx -> wsHandler.handleMessage(ctx));
-            ws.onClose(_ -> wsHandler.closeMessage());
+            ws.onClose(ctx -> wsHandler.closeMessage());
         });
     }
 
