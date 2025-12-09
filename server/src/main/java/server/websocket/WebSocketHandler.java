@@ -160,6 +160,7 @@ public class WebSocketHandler {
 
             if(gameParticipants.get(gID) == null){
                 ctx.send(ser.toJson(new ServerErrorMessage("game " + gData.gameName() + " does not exist")));
+                return;
             }
             if(!gameParticipants.get(gID).get(uName).equals(ctx)){
                 ctx.send(ser.toJson(new ServerErrorMessage("user not in game"))); return;
