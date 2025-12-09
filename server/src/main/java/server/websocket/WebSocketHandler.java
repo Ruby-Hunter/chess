@@ -189,13 +189,10 @@ public class WebSocketHandler {
                 gameParticipants.get(gID).remove(uName);
             } else{ // Observer
                 gameParticipants.get(gID).remove(uName);
-                return; // Observer leaving shouldn't send notification to all
             }
             gameParticipants.get(gID).forEach((name, curCtx) -> {
                 try {
-                    if (!Objects.equals(uName, name)) {
-                        curCtx.send(ser.toJson(new ServerNotificationMessage("Player " + uName + " has left the game.")));
-                    }
+                    curCtx.send(ser.toJson(new ServerNotificationMessage("Player " + uName + " has left the game.")));
                 } catch (Exception e){
                     System.err.println("Connection closed");
                 }
