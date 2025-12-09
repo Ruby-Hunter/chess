@@ -236,12 +236,10 @@ public class Client {
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
             return switch (cmd) {
                 case "m", "move" -> {
-                    if(params.length != 2) {
+                    if(params.length != 2)
                         yield "Usage: move <POS1> <POS2>";
-                    }
-                    if((params[0].length() != 2) || (params[1].length() != 2)){
+                    if((params[0].length() != 2) || (params[1].length() != 2))
                         yield "<POS> must be a <CHAR-INT>. Ex: <A3>";
-                    }
                     int oldCol = params[0].toUpperCase().charAt(0) - 64;
                     int oldRow = params[0].charAt(1) - 48;
                     int newCol = params[1].toUpperCase().charAt(0) - 64;
@@ -259,10 +257,25 @@ public class Client {
                 case "s", "show" -> {
                     yield BoardPrinter.printBoard(color);
                 }
+                case "hi", "highlight" -> {
+                    if(params.length != 1)
+                        yield "Usage: highlight <POS>";
+                    if((params[0].length() != 2))
+                        yield "<POS> must be a <CHAR-INT>. Ex: <A3>";
+                    int col = params[0].toUpperCase().charAt(0) - 64;
+                    int row = params[0].charAt(1) - 48;
+                    if((row < 1 || row > 8) || (col < 1 || col > 8))
+                        yield "<POS1> must be a valid position on chess board";
+                    yield BoardPrinter.printMoves(color, new ChessPosition(row, col));
+                }
                 case "l", "leave" -> {
                     wsFacade.send(new UserGameCommand(UserGameCommand.CommandType.LEAVE, auth.authToken(), gameID));
                     color = null;
                     state = GameState.LOGGED_IN;
+                    yield "";
+                }
+                case "r", "resign" -> {
+                    wsFacade.send(new UserGameCommand(UserGameCommand.CommandType.RESIGN, auth.authToken(), gameID));
                     yield "";
                 }
                 case "q", "quit" -> {
@@ -359,6 +372,8 @@ public class Client {
         System.out.println(" \u001b[;;4mCommands:\u001b[;;0m");
         System.out.println("  \u001b[33;49;1m\"m\"/\"move\" <POS1> <POS2> \u001b[34;49;1m- a piece");
         System.out.println("  \u001b[33;49;1m\"s\"/\"show\" \u001b[34;49;1m- the board");
+        System.out.println("  \u001b[33;49;1m\"hi\"/\"highlight\" <POS> \u001b[34;49;1m- legal moves");
+        System.out.println("  \u001b[33;49;1m\"r\"/\"resign\" \u001b[34;49;1m- from the game");
         System.out.println("  \u001b[33;49;1m\"l\"/\"leave\" \u001b[34;49;1m- the game");
         System.out.println("  \u001b[33;49;1m\"q\"/\"quit\" \u001b[34;49;1m- playing chess");
         System.out.println("  \u001b[33;49;1m\"h\"/\"help\" \u001b[34;49;1m- with possible commands\u001b[;;0m");

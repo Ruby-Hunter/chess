@@ -1,10 +1,11 @@
 package server.websocket;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
-import datamodel.GameData;
+import datamodel.*;
 import io.javalin.websocket.WsMessageContext;
 import org.eclipse.jetty.server.Authentication;
 import org.glassfish.grizzly.utils.Pair;
@@ -82,11 +83,11 @@ public class WebSocketHandler {
                 gameParticipants.get(gID).put(uName, ctx);
                 ctx.send(ser.toJson(new ServerLoad_GameMessage("Websocket Connected",
                         gData.game(), ChessGame.TeamColor.WHITE)));
-                return; // ensures observer joining does not notify players
             }
             gameParticipants.get(gID).forEach((_, curCtx) -> {
+                String team = cmd.getColor() != null ? cmd.getColor().toString() : "an observer.";
                 curCtx.send(ser.toJson(new ServerNotificationMessage(
-                        "Player " + uName + " has joined the game as " + cmd.getColor())));
+                        "Player " + uName + " has joined the game as " + team)));
             });
         } catch (Exception e) {
             ctx.send(ser.toJson(new ServerErrorMessage("Error Connecting")));
@@ -98,34 +99,52 @@ public class WebSocketHandler {
             GameData gData = dataAccess.getGame(cmd.getGameID());
             String uName = dataAccess.getAuth(cmd.getAuthToken()).username();
             ChessGame game = gData.game();
+            ChessMove move = cmd.getMove();
 
-            game.makeMove(cmd.getMove());
+            if(game.isGameOver()){
+                ctx.send(ser.toJson(new ServerNotificationMessage("Game is already over.")));
+                return;
+            }
+            game.makeMove(move);
             dataAccess.updateGame(gData);
             ChessGame.TeamColor curColor = game.getTeamTurn();
-            if(gData.game().isInStalemate(curColor)){
+            String enemyName = (curColor == ChessGame.TeamColor.WHITE) ? gData.whiteUsername() : gData.blackUsername();;
+            String moveString = uName + " moved piece " + move.getStartPosition() + " to " + move.getEndPosition();
+
+            if(game.isInStalemate(curColor)){
                 gameParticipants.get(cmd.getGameID()).forEach((_, curCtx) -> {
                     curCtx.send(ser.toJson(new ServerNotificationMessage("Stalemate!")));
                 });
                 return;
             }
-            if(gData.game().isInCheckmate(curColor)){
+            if(game.isInCheckmate(curColor)){
                 gameParticipants.get(cmd.getGameID()).forEach((curName, curCtx) -> {
                     ChessGame.TeamColor color = (Objects.equals(gData.blackUsername(), curName))
                             ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
                     curCtx.send(ser.toJson(new ServerLoad_GameMessage(
-                            "Checkmate! " + curColor + " loses!", gData.game(), color)));
+                            "Checkmate! " + enemyName + " loses!", game, color)));
                 });
                 return;
             }
-            gameParticipants.get(cmd.getGameID()).forEach((curName, curCtx) -> {
+            if(game.isInCheck(curColor)){
+                gameParticipants.get(cmd.getGameID()).forEach((curName, curCtx) -> {
+                    ChessGame.TeamColor color = (Objects.equals(gData.blackUsername(), curName))
+                            ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
+                    curCtx.send(ser.toJson(new ServerLoad_GameMessage(
+                            "Player " + uName + " moved " + move.getStartPosition() + " to " +
+                                    move.getEndPosition() + "\nPlayer " + enemyName + " is in check!", game, color)));
+                });
+                return;
+            }
+            gameParticipants.get(cmd.getGameID()).forEach((curName, curCtx) -> { // normal move
                 ChessGame.TeamColor color = (Objects.equals(gData.blackUsername(), curName))
                         ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE;
                 if(curName.equals(uName)) {
-                    curCtx.send(ser.toJson(new ServerLoad_GameMessage("Move valid ", gData.game(), color)));
-                    if(game.isInCheck(curColor))
-                        curCtx.send(ser.toJson(new ServerNotificationMessage("You're in check!")));
+                    curCtx.send(ser.toJson(new ServerLoad_GameMessage("Player " + uName + " moved " +
+                            move.getStartPosition() + " to " + move.getEndPosition(), game, color)));
                 } else{
-                    curCtx.send(ser.toJson(new ServerLoad_GameMessage("Game loaded: ", gData.game(), color)));
+                    curCtx.send(ser.toJson(new ServerLoad_GameMessage("Player " + uName + " moved " +
+                            move.getStartPosition() + " to " + move.getEndPosition(), game, color)));
                 }
             });
         } catch (InvalidMoveException ex){
@@ -162,15 +181,24 @@ public class WebSocketHandler {
             ctx.send(ser.toJson(new ServerNotificationMessage("Left Game " + gData.gameName())));
             gameParticipants.get(gID).forEach((_, curCtx) -> {
                 curCtx.send(ser.toJson(new ServerNotificationMessage(
-                        "Player " + gData.gameName() + " has left the game.")));
+                        "Player " + uName + " has left the game.")));
             });
         } catch (Exception e) {
             ctx.send(ser.toJson(new ServerErrorMessage("Error Leaving")));
         }
     }
 
-    private void handleResign(WsMessageContext ctx, UserGameCommand cmd){
-        ctx.send(ser.toJson(new ServerNotificationMessage("Notification")));
+    private void handleResign(WsMessageContext ctx, UserGameCommand cmd) throws Exception {
+        int gID = cmd.getGameID();
+        GameData gData = dataAccess.getGame(gID);
+        ChessGame game = gData.game();
+        String uName = dataAccess.getAuth(cmd.getAuthToken()).username();
+        game.resign();
+        dataAccess.updateGame(new GameData(gID, gData.whiteUsername(), gData.blackUsername(), gData.gameName(), game));
+        gameParticipants.get(gID).forEach((_, curCtx) -> {
+            curCtx.send(ser.toJson(new ServerNotificationMessage(
+                    "Player " + uName + " has resigned!")));
+        });
     }
 
     public void echo(WsMessageContext ctx){

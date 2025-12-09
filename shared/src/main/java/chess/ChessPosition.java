@@ -27,6 +27,12 @@ public class ChessPosition {
     }
 
     @Override
+    public String toString() {
+        char rowChar = (char) (row+96);
+        return rowChar + "" + col;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {
             return false;

@@ -92,6 +92,7 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        if(gameOver) throw new InvalidMoveException("Game is Over");
         ChessPosition startPos = move.getStartPosition();
         ChessPiece movingPiece = chessBoard.getPiece(startPos);
         if(movingPiece == null){ // If there is no piece, throw an error
@@ -139,7 +140,8 @@ public class ChessGame {
      * @return True if the specified team is in checkmate
      */
     public boolean isInCheckmate(TeamColor teamColor) {
-        return (isInCheck(teamColor)) && (!hasMoves(teamColor));
+        gameOver = gameOver || (isInCheck(teamColor) && !hasMoves(teamColor));
+        return gameOver;
     }
 
     /**
@@ -170,6 +172,10 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return chessBoard;
+    }
+
+    public void resign(){
+        gameOver = true;
     }
 
     public boolean isGameOver(){
