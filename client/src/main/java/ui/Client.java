@@ -183,7 +183,12 @@ public class Client {
                     yield "\nJoined game " + gameID;
                 }
                 case "o", "observe" -> {
+                    if(params.length != 1){
+                        yield "Usage: observe <ID>";
+                    }
+                    gameID = Integer.parseInt(params[0]);
                     wsFacade = new WebSocketFacade(uriString, this);
+                    wsFacade.send(new UserConnectCommand(auth.authToken(), gameID, null));
                     state = GameState.OBSERVING;
                     observingHelp();
                     yield "\nObserving";
@@ -315,20 +320,21 @@ public class Client {
             }
             return switch (cmd) {
                 case "s", "show" -> {
-                    BoardPrinter.printBoard(ChessGame.TeamColor.WHITE);
-                    yield "show";
+                    yield BoardPrinter.printBoard(ChessGame.TeamColor.WHITE);
                 }
                 case "q", "quit" -> {
                     res = "quit";
-                    yield "quit";
+                    yield "";
                 }
                 case "h", "help" -> {
                     observingHelp();
-                    yield "help";
+                    yield "";
                 }
                 case "l", "leave" -> {
+                    wsFacade.send(new UserGameCommand(UserGameCommand.CommandType.LEAVE, auth.authToken(), gameID));
+                    color = null;
                     state = GameState.LOGGED_IN;
-                    yield "leave";
+                    yield "";
                 }
                 default -> {
                     observingHelp();
