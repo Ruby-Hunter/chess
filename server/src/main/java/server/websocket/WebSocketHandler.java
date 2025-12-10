@@ -2,6 +2,7 @@ package server.websocket;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPosition;
 import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
@@ -116,6 +117,10 @@ public class WebSocketHandler {
                 return;
             }
             ChessMove move = cmd.getMove();
+            if(game.getBoard().getPiece(move.getStartPosition()) == null){
+                ctx.send(ser.toJson(new ServerErrorMessage("Invalid spot, no piece there")));
+                return;
+            }
             if(inputColor != game.getBoard().getPiece(move.getStartPosition()).getTeamColor()){
                 ctx.send(ser.toJson(new ServerErrorMessage("Not your turn")));
                 return;
@@ -140,7 +145,7 @@ public class WebSocketHandler {
                     } else {
                         curCtx.send(ser.toJson(new ServerLoadGameMessage(game, color)));
                         curCtx.send(ser.toJson(new ServerNotificationMessage("Player " + uName + " moved " +
-                                move.getStartPosition() + " to " + move.getEndPosition())));
+                                    move.getStartPosition() + " to " + move.getEndPosition())));
                     }
                     if(game.isInCheckmate(enemyColor)){
                         curCtx.send(ser.toJson(new ServerNotificationMessage("Checkmate! " + enemyName + " loses!")));

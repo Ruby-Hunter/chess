@@ -28,8 +28,8 @@ public class ChessPosition {
 
     @Override
     public String toString() {
-        char rowChar = (char) (row+96);
-        return rowChar + "" + col;
+        char colChar =  (char) (col+96);
+        return ("" + colChar + "" + row);
     }
 
     @Override

@@ -242,7 +242,7 @@ public class Client {
             return switch (cmd) {
                 case "m", "move" -> {
                     if(params.length != 2){
-                        yield "Usage: move <POS1> <POS2>";
+                        yield "Usage: move <POS1> <POS2> <";
                     }
                     if((params[0].length() != 2) || (params[1].length() != 2)){
                         yield "<POS> must be a <CHAR-INT>. Ex: <A3>";
@@ -315,20 +315,41 @@ public class Client {
             String[] tokens = line.toLowerCase().split(" ");
             String cmd = (tokens.length > 0) ? tokens[0] : "help";
             String[] params = Arrays.copyOfRange(tokens, 1, tokens.length);
-            if(params.length > 0){
-                return "Too many arguments";
-            }
             return switch (cmd) {
                 case "s", "show" -> {
+                    if(params.length > 0){
+                        yield "Too many arguments";
+                    }
                     yield BoardPrinter.printBoard(ChessGame.TeamColor.WHITE);
                 }
                 case "q", "quit" -> {
+                    if(params.length > 0){
+                        yield "Too many arguments";
+                    }
+                    wsFacade.send(new UserGameCommand(UserGameCommand.CommandType.LEAVE, auth.authToken(), gameID));
                     res = "quit";
                     yield "";
                 }
                 case "h", "help" -> {
+                    if(params.length > 0){
+                        yield "Too many arguments";
+                    }
                     observingHelp();
                     yield "";
+                }
+                case "hi", "highlight" -> {
+                    if(params.length != 1){
+                        yield "Usage: highlight <POS>";
+                    }
+                    if((params[0].length() != 2)){
+                        yield "<POS> must be a <CHAR-INT>. Ex: <A3>";
+                    }
+                    int col = params[0].toUpperCase().charAt(0) - 64;
+                    int row = params[0].charAt(1) - 48;
+                    if((row < 1 || row > 8) || (col < 1 || col > 8)){
+                        yield "<POS1> must be a valid position on chess board";
+                    }
+                    yield BoardPrinter.printMoves(color, new ChessPosition(row, col));
                 }
                 case "l", "leave" -> {
                     wsFacade.send(new UserGameCommand(UserGameCommand.CommandType.LEAVE, auth.authToken(), gameID));
@@ -342,7 +363,7 @@ public class Client {
                 }
             };
         } catch (Exception ex){
-            return "observing_eval error";
+            return "observing_eval error: " + ex.getMessage();
         }
     }
 
@@ -395,6 +416,7 @@ public class Client {
     private void observingHelp(){
         System.out.println(" \u001b[;;4mCommands:\u001b[;;0m");
         System.out.println("  \u001b[33;49;1m\"s\"/\"show\" \u001b[34;49;1m- the board");
+        System.out.println("  \u001b[33;49;1m\"hi\"/\"highlight\" <POS> \u001b[34;49;1m- legal moves");
         System.out.println("  \u001b[33;49;1m\"l\"/\"leave\" \u001b[34;49;1m- the game");
         System.out.println("  \u001b[33;49;1m\"q\"/\"quit\" \u001b[34;49;1m- playing chess");
         System.out.println("  \u001b[33;49;1m\"h\"/\"help\" \u001b[34;49;1m- with possible commands\u001b[;;0m");

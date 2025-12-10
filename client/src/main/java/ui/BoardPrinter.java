@@ -46,8 +46,14 @@ public class BoardPrinter {
 
     public static String printMoves(ChessGame.TeamColor color, ChessPosition pos){
         Collection<ChessMove> moves = game.validMoves(pos);
-        return color == WHITE ?
-                printMovesWhite(game.getBoard(), moves, pos) : printMovesBlack(game.getBoard(), moves, pos);
+        if(game.getBoard().getPiece(pos) == null){
+            return "Not a piece";
+        }
+        if(color == null){
+            return printMovesWhite(game.getBoard(), moves, pos);
+        }
+        return color.equals(ChessGame.TeamColor.BLACK) ?
+                printMovesBlack(game.getBoard(), moves, pos) : printMovesWhite(game.getBoard(), moves, pos);
     }
 
     private static void printTile(ChessBoard board, int r, int c){
